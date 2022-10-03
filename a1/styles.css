@@ -1,0 +1,215 @@
+
+body {
+    /* background-color: black; */
+    background-color: rgba(0, 0, 0, 0.677);
+    display: flexbox;
+}
+
+
+/* Make scrollbar look better */
+/* https://stackoverflow.com/questions/9664325/style-the-scrollbar-with-css-in-google-chrome-webkit */
+::-webkit-scrollbar {
+    height: 0.5em;
+    width: 12px;
+    background: rgba(123, 20, 20, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(202, 196, 26, 0.2);
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(4, 3, 3, 0.2);
+}
+
+
+/* Shared styles */
+.myfont-enlarged {
+    font-size: 2.5vw;
+}
+
+/* Navbar  */
+.hdr-navbar {
+    background-color: rgba(255, 0, 0, 0.345);
+    position: fixed;
+    z-index: 2;
+    width: 100%;
+    overflow-x: auto;
+    
+}
+.hdr-navbar ul {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+}
+
+.hdr-navbar ul li {
+    display: flex;
+    background-color: rgba(192, 192, 192, 0.611);
+    border: 0.2em dotted rgba(0, 0, 0, 0.432);
+    margin: 0em 0.5em;
+}
+
+.hdr-navbar li a {
+    /* padding: 0.5em;
+    font-size: 2em; */
+    padding: 0.5vw;
+    font-size: 2vw;
+
+    font-family: Arial, Helvetica, sans-serif;
+    color: blue;
+}
+
+.hdr-navbar li a:hover {
+    color: rgba(255, 255, 0, 0.864);
+}
+
+/* Header title and image */
+header {
+    display: flexbox;
+}
+
+
+.hdr-main {
+    display: block;
+    height: auto;
+    width: auto;
+    padding-top: 10em;
+}
+
+.hdr-main img {
+    /* make it as background and allow title to have absolute position on it */
+    position: relative;
+    z-index: 0;
+    /* assign size and center it */
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hdr-title {
+    z-index: 1;
+    position: absolute;    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: -2vw auto;
+    text-align: center;
+    width: 100%;
+    font-size: 10vw; /* This is to avoid overflow and auto resize of font for responsive design */
+    /* color: rgba(255, 255, 252, 0.6); */
+    /* color: rgba(255, 123, 0, 0.6); */
+    /* color: rgba(255, 122, 75, 0.7); */
+    color: rgba(255, 122, 75, 0.8);
+}
+.hdr-subtitle {
+    z-index: 1;
+    position: absolute;    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 50vw auto;
+    text-align: center;
+    width: 100%;
+    font-size: 5vw; /* This is to avoid overflow and auto resize of font for responsive design */
+    /* color: rgba(255, 255, 252, 0.6); */
+    /* color: rgba(255, 123, 0, 0.6); */
+    /* color: rgba(255, 122, 75, 0.7); */
+    color: orangered;
+}
+
+
+/* body-description section */
+.body-description img {
+    /* height: 25em; */
+    height: 25vw;
+}
+.body-description p {
+    font-family: Arial, Helvetica, sans-serif;
+    /* font-size: 1em; */
+    font-size: 2vw;
+    color: rgba(210, 105, 30, 1);
+}
+.body-list-text {
+    font-family: Arial, Helvetica, sans-serif;
+    /* font-size: 1em; */
+    font-size: 1vw;
+    color: rgba(210, 105, 30, 1);
+}
+
+
+.body-flex {
+    display: flex;
+    justify-content: space-evenly;
+}
+.body-flex-elem {
+    /* margin: 1em 1em; */
+    margin: 0vw 1vw;
+}
+
+/* table formatting: history */
+.body-description table {
+    border-width: 0.5vw;
+    border: thin solid white;
+    margin: auto auto;
+}
+.body-description tr:nth-child(odd) {
+    background-color: rgba(235, 38, 16, 0.088);
+}
+.body-description tr:nth-child(even) {
+    background-color: rgba(217, 128, 19, 0.453);
+}
+.body-description th, .body-description td {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 2vw;
+    color:rgba(201, 212, 40, 0.677);
+    padding: 0.5vw 2vw;
+    
+}
+
+
+/* join us side note */
+.side-note {
+    background-color: rgba(0, 255, 255, 0.079);
+    /* width: 50em; */
+    width: 50vw;
+    text-align: center;
+    margin: auto auto;
+    /* margin-bottom: 1em; */
+    margin-bottom: 1vw;
+}
+.side-note p {
+    /* font-size: 2.5em; */
+    font-size: 2.5vw;
+    color:rgb(210, 30, 30)
+}
+.side-note button {
+    background-color: rgba(0, 0, 255, 0.2);
+    /* font-size: 5em; */
+    font-size: 5vw;
+    /* margin-bottom: 1em; */
+    margin-bottom: 1vw;
+}
+.side-note button:hover {
+    background-color: rgba(0, 0, 255, 0.5);
+}
+
+
+/* footer */
+footer {
+    /* footer should be in center */
+    display: block;
+    height: auto;
+    /* width: 50em; */
+    /* width: 50vw; */
+    width: 100%;
+    padding: 0.5em 0.1em;
+    /* /* padding: 0.5em 0.1em; */
+    padding: 0.5vw 0.1vw;
+    margin-left: auto;
+    margin-right: auto;
+
+    /* color and font styles */
+    background-color: rgb(98, 92, 92);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    /* font-size: 1em; */
+    font-size: 1vw;
+    text-align: center;
+    color: yellow;
+}
