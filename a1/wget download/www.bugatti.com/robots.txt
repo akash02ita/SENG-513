@@ -1,0 +1,11 @@
+User-Agent: *
+Allow: /                                      # Allow bot to enter
+Disallow: /typo3/                             # Nothing to see here
+Allow: /typo3conf/ext/bugatti_sitepackage/Resources/Public/
+Disallow: /typo3conf/                         # Nothing to see here
+Disallow: /typo3temp/                         # Nothing to see here
+Disallow: /chiron-geneva/                     # Nothing to see here
+
+Sitemap: https://www.bugatti.com/sitemap.xml?tx_csseo_view=pages
+Sitemap: https://www.bugatti.com/de/sitemap.xml?tx_csseo_view=pages
+Sitemap: https://www.bugatti.com/fr/sitemap.xml?tx_csseo_view=pages
