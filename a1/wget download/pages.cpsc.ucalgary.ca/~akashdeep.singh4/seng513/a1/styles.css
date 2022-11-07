@@ -1,0 +1,318 @@
+
+body {
+    /* background-color: black; */
+    /* background-color: rgba(0, 0, 0, 0.677); */
+    background-color: black;
+    display: block;
+}
+
+
+/* Make scrollbar look better */
+/* https://stackoverflow.com/questions/9664325/style-the-scrollbar-with-css-in-google-chrome-webkit */
+::-webkit-scrollbar {
+    height: 0.5em;
+    width: 12px;
+    background: rgba(123, 20, 20, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(202, 196, 26, 0.2);
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(4, 3, 3, 0.2);
+}
+
+
+/* Shared styles */
+.myfont-enlarged {
+    font-size: 2.5vw;
+}
+
+/* Navbar  */
+.hdr-navbar {
+    /* background-color: rgba(255, 0, 0, 0.345); */
+    background-color: rgba(255, 0, 0, 0.5);
+    position: fixed;
+    z-index: 2;
+    width: 100%;
+    overflow-x: auto;
+    
+}
+.hdr-navbar ul {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+}
+
+.hdr-navbar ul li {
+    display: flex;
+    background-color: rgba(192, 192, 192, 0.611);
+    border-radius: 2vh;
+    /* border: 0.2em dotted rgba(0, 0, 0, 0.432); */
+    margin: 0em 0.5em;
+    padding: 1vh;
+    border-radius: ;
+}
+
+.hdr-navbar li a {
+    /* padding: 0.5em;
+    font-size: 2em; */
+    padding: 0.5vw;
+    font-size: 2vw;
+
+    font-family: Arial, Helvetica, sans-serif;
+    color: blue;
+    text-decoration: none; /* Remove underline */
+}
+
+.hdr-navbar li a:hover {
+    color: rgba(255, 255, 0, 0.864);
+}
+
+/* Header title and image */
+header {
+    display: block;
+}
+
+.hdr-main {
+    display: block;
+    height: auto;
+    width: auto;
+    padding-top: 10em;
+}
+
+.hdr-main img {
+    /* make it as background and allow title to have absolute position on it */
+    position: relative;
+    z-index: 0;
+    /* assign size and center it */
+    width: 100%;
+    min-height: 60vw;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 2vw;
+}
+
+.hdr-title {
+    z-index: 1;
+    position: absolute;    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: -2vw auto;
+    text-align: center;
+    width: 100%;
+    font-size: 10vw; /* This is to avoid overflow and auto resize of font for responsive design */
+    /* color: rgba(255, 255, 252, 0.6); */
+    /* color: rgba(255, 123, 0, 0.6); */
+    /* color: rgba(255, 122, 75, 0.7); */
+    /* color: rgba(255, 122, 75, 0.8); */
+    color: rgb(255, 88, 27);
+    background-color: rgba(20, 85, 85, 0.352); /* to help ease read from text color */
+}
+.hdr-subtitle {
+    z-index: 1;
+    position: absolute;    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 50vw auto;
+    text-align: center;
+    width: 100%;
+    font-size: 5vw; /* This is to avoid overflow and auto resize of font for responsive design */
+    /* color: rgba(255, 255, 252, 0.6); */
+    /* color: rgba(255, 123, 0, 0.6); */
+    /* color: rgba(255, 122, 75, 0.7); */
+    /* color: orangered; */
+    background-color: rgba(255, 255, 255, 0.652);
+}
+
+
+/* body-description section */
+.body-description img {
+    /* height: 25em; */
+    height: 25vw;
+}
+.body-description p {
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgba(210, 105, 30, 1);
+    /* font-size: 1em; */
+    font-size: 2vw;
+}
+.body-description h1, h2{
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgba(210, 105, 30, 1);
+    font-size: 5vw;
+    text-align: center;
+}
+.body-list-text {
+    font-family: Arial, Helvetica, sans-serif;
+    /* font-size: 1em; */
+    font-size: 1vw;
+    color: rgba(210, 105, 30, 1);
+}
+
+
+.body-flex {
+    display: flex;
+    justify-content: space-evenly;
+}
+.body-flex-elem {
+    /* margin: 1em 1em; */
+    margin: 0vw 1vw;
+}
+
+/* table formatting: history */
+.body-description table {
+    border-width: 0.5vw;
+    border: thin solid white;
+    margin: auto auto;
+}
+.body-description tr:nth-child(odd) {
+    background-color: rgba(235, 38, 16, 0.088);
+}
+.body-description tr:nth-child(even) {
+    background-color: rgba(217, 128, 19, 0.453);
+}
+.body-description th, .body-description td {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 2vw;
+    color:rgba(201, 212, 40, 0.677);
+    padding: 0.5vw 2vw;
+    
+}
+
+
+/* join us side note */
+.side-note {
+    /* background-color: rgba(0, 255, 255, 0.075); */
+    /* background-color: rgba(255, 255, 255, 0.74); */
+    background-color: rgba(124,69,69,.74);
+    border-radius: 2vw;
+    /* width: 50em; */
+    width: 50vw;
+    text-align: center;
+    margin: auto auto;
+    /* margin-bottom: 1em; */
+    margin-bottom: 1vw;
+}
+.side-note p {
+    /* font-size: 2.5em; */
+    font-size: 2.5vw;
+    color: rgba(255, 69, 0, 1);
+    /* color:rgb(210, 30, 30); */
+}
+.side-note button {
+    /* background-color: rgba(0, 0, 255, 0.2); */
+    background-color: rgba(255, 17, 0, 0.73);
+    border-radius: 2vw;
+    /* font-size: 5em; */
+    font-size: 5vw;
+    /* margin-bottom: 1em; */
+    margin-bottom: 1vw;
+}
+.side-note button:hover {
+    background-color: rgba(0, 0, 255, 0.5);
+}
+
+/* card containing block styling (collections) */
+.container-block {
+    display: block;
+    justify-content: center;
+    text-align: center;
+}
+
+.card-block  {
+    display: block;
+}
+
+.card-block img {
+    width: 40vw;
+    height: 25vw;
+}
+
+.card-description p{
+    display: block;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    color: rgb(149, 167, 183);
+}
+
+.card-gap {
+    margin: 1vw;
+}
+
+/* card containing flex styling (our staff) */
+.container-flex {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.card-flex {
+    display: block;
+    /* width: auto; */
+    width: 15em;
+    background-color: rgba(0, 255, 255, 0.429);
+    border-radius: 2vh;
+    margin: 0.5em 0.5em;
+}
+.card-flex:hover{
+    background-color: rgba(0, 255, 255, 0.7);
+
+}
+.card-flex img {
+    display: block;
+    width: 100%;
+    border-radius: 2vh;
+    height: 10em;
+    transform: scale(0.9);
+    
+} 
+.card-flex img:hover{
+    border-top-left-radius: 2vh;
+    border-top-right-radius: 2vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    transform: scale(1.0);
+}
+.card-flex h1, .card-flex p{
+    display: block;
+    color: white;
+    text-align: center;
+}
+
+.card-flex h1 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 1.5em;
+}
+.card-flex p {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1em;
+}
+/* no zoom exceptions so that images do not get modified */
+.card-flex.no-zoom img{
+    width: auto;
+}
+.card-flex.no-zoom {
+    display: block;
+    width: auto;
+}
+
+/* footer */
+footer {
+    /* footer should be in center */
+    display: block;
+    height: auto;
+    /* width: 50em; */
+    /* width: 50vw; */
+    width: 100%;
+    padding: 0.5em 0.1em;
+    /* /* padding: 0.5em 0.1em; */
+    padding: 0.5vw 0.1vw;
+    margin-left: auto;
+    margin-right: auto;
+
+    /* color and font styles */
+    background-color: rgb(98, 92, 92);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    /* font-size: 1em; */
+    font-size: 1vw;
+    text-align: center;
+    color: yellow;
+}
