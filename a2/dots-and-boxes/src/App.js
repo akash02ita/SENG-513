@@ -8,8 +8,8 @@ import Game from './components/Game'
 function App() {
   return (
     <div className="App">
-      <p>In App paragraph window width is {window.innerWidth}</p>
-      <Game />
+      <Game boardId="uniqueId1"/>
+      <Game boardId="uniqueId2"/>
     </div>
   );
 }
