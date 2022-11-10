@@ -56,13 +56,13 @@ function Game(props) {
         const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
         const [x, y] = [Math.max(0, mouseCoord.x - offsetX), Math.max(0, mouseCoord.y - offsetY)];
         let closestX1 = Math.min(
-            idealWidth / (rows - 1) * (rows - 2),
-            Math.floor(x / idealWidth * (rows - 1)) / (rows - 1) * idealWidth);
+            idealWidth / (cols - 1) * (cols - 2),
+            Math.floor(x / idealWidth * (cols - 1)) / (cols - 1) * idealWidth);
         let closestY1 = Math.min(
-            idealHeight / (cols - 1) * (cols - 2),
-            Math.floor(y / idealHeight * (cols - 1)) / (cols - 1) * idealHeight);
-        let closestX2 = closestX1 + idealWidth / (rows - 1);
-        let closestY2 = closestY1 + idealHeight / (cols - 1);
+            idealHeight / (rows - 1) * (rows - 2),
+            Math.floor(y / idealHeight * (rows - 1)) / (rows - 1) * idealHeight);
+        let closestX2 = closestX1 + idealWidth / (cols - 1);
+        let closestY2 = closestY1 + idealHeight / (rows - 1);
 
         // go back to Global Space
         closestX1 += offsetX;
@@ -178,10 +178,10 @@ function Game(props) {
 
         const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
         let circles = [];
-        for (let j = 0; j < cols; j++) {
-            let y = idealHeight / (cols - 1) * j + offsetY;
-            for (let i = 0; i < rows; i++) {
-                let x = idealWidth / (rows - 1) * i + offsetX;
+        for (let j = 0; j < rows; j++) {
+            let y = idealHeight / (rows - 1) * j + offsetY;
+            for (let i = 0; i < cols; i++) {
+                let x = idealWidth / (cols - 1) * i + offsetX;
                 circles.push([x, y]);
             }
         }
@@ -217,8 +217,8 @@ function Game(props) {
         */
         let lines = [];
         // horizontal lines
-        for (let j = 0; j < cols; j++) {
-            for (let i = 0; i < rows - 1; i++) {
+        for (let j = 0; j < rows; j++) {
+            for (let i = 0; i < cols - 1; i++) {
 
             }
         }

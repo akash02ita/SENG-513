@@ -8,7 +8,7 @@ import Game from './components/Game'
 function App() {
   return (
     <div className="App">
-      <Game boardId="uniqueId1"/>
+      <Game rows="2" cols="3" boardId="uniqueId1"/>
       <Game boardId="uniqueId2"/>
     </div>
   );
