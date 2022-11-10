@@ -90,7 +90,34 @@ function Game(props) {
         // we will just pick one choice, whichever the below code picks first.
         // for a more detailed explanation please see the code below
 
-        
+        const getSumDistSqr = ([x, y], [ax, ay], [bx, by]) => {
+            const axy2 = Math.pow(ax - x, 2) + Math.pow(ay - y, 2);
+            const bxy2 = Math.pow(bx - x, 2) + Math.pow(by - y, 2);
+            // console.log("Debug dist")
+            // console.log(x, y, ax, ay, bx, by);
+            console.log(axy2 + " + " + bxy2 + " = " + (axy2 + bxy2));
+            return axy2 + bxy2;
+        }
+        const E = [mouseCoord.x, mouseCoord.y];
+        const A = [closestX1, closestY1];
+        const B = [closestX2, closestY1];
+        const C = [closestX2, closestY2];
+        const D = [closestX1, closestY2];
+
+        // sort in ascending order, based on 1st element of each sublist, the list of squared sum lengths of 2 sides of each triangle
+        const distPointsList = [
+            [getSumDistSqr(E, A, B), A, B],
+            [getSumDistSqr(E, B, C), B, C],
+            [getSumDistSqr(E, D, C), D, C],
+            [getSumDistSqr(E, A, D), A, D],
+        ].sort((a, b) => a[0] - b[0]);
+
+        // console.log("The sorted list is");
+        // console.log(distPointsList);
+
+        // pick the list with smallest distance square of 2 sides of triangle
+        const sd = distPointsList[0];
+        [closestX1, closestY1, closestX2, closestY2] = [sd[1][0], sd[1][1], sd[2][0], sd[2][1]];
 
 
         console.log("Debug getlinebymouse");
