@@ -75,24 +75,52 @@ function Game(props) {
         // The task is now to see where and which line is closest within that box according to mouse coordinates
         /* 
                           A(x1,y1)           B(x2,y1)
-                                       |
-                                       |
-                              -----  E(x,y)  -----
-                                       |
-                                       |   
+                                   \  T1     /
+                                    \       /
+                              T4      Mid     T2
+                                    /      \   ->E(x,y)
+                                   /  T3    \
                           D(x2,y1)           C(x2,y2)
         */
         // So the closest line to E is one of AB,BC,DC,AD
-        // But how do we find the closest one? Well one property is to think about DISTANCES between point and each of the line
-        // The line that gives smallest distance is the closest one
-        // EDGE CASE: what if all sum of lengths are same (so that means E is exactly in center)?
+        // But how do we find the closest one? Well one property is to think about in which of the 4 triangles (T1,T2,T3,T4) the point E lies in
+        // EDGE CASE: what if E == Mid?
         // we will just pick one choice, whichever the below code picks first.
 
-        const calculateDistance = ([x0, y0], [x1, y1], [x2, y2]) => {
-            // using this formula: https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
-            const numerator = Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1));
-            const denominator = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-            return numerator / denominator;
+
+        const getLineByTriangleContainingPoint = (E, A, B, C, D) => {
+            const isPointinTriangle = (e, p0, p1, p2) => {
+                // This boolean method is from the following source:
+                // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
+                const s = (p0[0] - p2[0]) * (e[1] - p2[1]) - (p0[1] - p2[1]) * (e[0] - p2[0]);
+                const t = (p1[0] - p0[0]) * (e[1] - p0[1]) - (p1[1] - p0[1]) * (e[0] - p0[0]);
+
+                if ((s < 0) != (t < 0) && s != 0 && t != 0)
+                    return false;
+
+                var d = (p2[0] - p1[0]) * (e[1] - p1[1]) - (p2[1] - p1[1]) * (e[0] - p1[0]);
+                return d == 0 || (d < 0) == (s + t <= 0);
+            }
+
+            // get center of rectangle
+            const M = [(A[0] + B[0]) / 2, (A[1] + D[1]) / 2];
+            // if point E is one of the triangle then return the appriate line coordinates
+            if (isPointinTriangle(E, A, M, B)) {
+                return [A[0], A[1], B[0], B[1]];
+            }
+            else if (isPointinTriangle(E, B, M, C)) {
+                return [B[0], B[1], C[0], C[1]];
+            }
+            else if (isPointinTriangle(E, D, M, C)) {
+                return [D[0], D[1], C[0], C[1]];
+
+            } else if (isPointinTriangle(E, A, M, D)) {
+                return [A[0], A[1], D[0], D[1]];
+
+            }
+
+            // otherwise return null coordinates since point is outside the square, so inside none of the triangles
+            return [null, null, null, null];
         }
         const E = [mouseCoord.x, mouseCoord.y];
         const A = [closestX1, closestY1];
@@ -100,25 +128,10 @@ function Game(props) {
         const C = [closestX2, closestY2];
         const D = [closestX1, closestY2];
 
-        // sort in ascending order, based on 1st element of each sublist, the list of squared sum lengths of 2 sides of each triangle
-        const distPointsList = [
-            [calculateDistance(E, A, B), A, B],
-            [calculateDistance(E, B, C), B, C],
-            [calculateDistance(E, D, C), D, C],
-            [calculateDistance(E, A, D), A, D],
-        ].sort((a, b) => a[0] - b[0]);
-
-        // console.log("The sorted list is");
-        // console.log(distPointsList);
-
-        // pick the list with smallest distance square of 2 sides of triangle
-        const sd = distPointsList[0];
-        [closestX1, closestY1, closestX2, closestY2] = [sd[1][0], sd[1][1], sd[2][0], sd[2][1]];
-
-
+        const [lineX1, lineY1, lineX2, lineY2] = getLineByTriangleContainingPoint(E, A, B, C, D);
         console.log("Debug getlinebymouse");
-        console.log([closestX1, closestY1, closestX2, closestY2]);
-        return [closestX1, closestY1, closestX2, closestY2];
+        console.log([lineX1, lineY1, lineX2, lineY2]);
+        return [lineX1, lineY1, lineX2, lineY2];
     }
 
     const getClosestLinePointsByMouse = () => {
