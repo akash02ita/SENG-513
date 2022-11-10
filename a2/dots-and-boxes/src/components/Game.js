@@ -75,28 +75,24 @@ function Game(props) {
         // The task is now to see where and which line is closest within that box according to mouse coordinates
         /* 
                           A(x1,y1)           B(x2,y1)
-                                 \          /
-                                  \        /
-                                    E(x,y)
-                                  /        \
+                                       |
+                                       |
+                              -----  E(x,y)  -----
+                                       |
+                                       |   
                           D(x2,y1)           C(x2,y2)
         */
         // So the closest line to E is one of AB,BC,DC,AD
-        // But how do we find the closest one? Well one property is to think about Traingles AEB, BEC, DEC, AED
-        // The triangle with smallest perimeter is the one we can choose.
-        // So the triangle that has the smallest SUM of 2 lines, containing the point E, is where the closest line is located
-        // So, by finding min of EA+EB,EB+EC,EC+ED,ED+EA we can figure out where the smallest line will be
+        // But how do we find the closest one? Well one property is to think about DISTANCES between point and each of the line
+        // The line that gives smallest distance is the closest one
         // EDGE CASE: what if all sum of lengths are same (so that means E is exactly in center)?
         // we will just pick one choice, whichever the below code picks first.
-        // for a more detailed explanation please see the code below
 
-        const getSumDistSqr = ([x, y], [ax, ay], [bx, by]) => {
-            const axy2 = Math.pow(ax - x, 2) + Math.pow(ay - y, 2);
-            const bxy2 = Math.pow(bx - x, 2) + Math.pow(by - y, 2);
-            // console.log("Debug dist")
-            // console.log(x, y, ax, ay, bx, by);
-            console.log(axy2 + " + " + bxy2 + " = " + (axy2 + bxy2));
-            return axy2 + bxy2;
+        const calculateDistance = ([x0, y0], [x1, y1], [x2, y2]) => {
+            // using this formula: https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
+            const numerator = Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1));
+            const denominator = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            return numerator / denominator;
         }
         const E = [mouseCoord.x, mouseCoord.y];
         const A = [closestX1, closestY1];
@@ -106,10 +102,10 @@ function Game(props) {
 
         // sort in ascending order, based on 1st element of each sublist, the list of squared sum lengths of 2 sides of each triangle
         const distPointsList = [
-            [getSumDistSqr(E, A, B), A, B],
-            [getSumDistSqr(E, B, C), B, C],
-            [getSumDistSqr(E, D, C), D, C],
-            [getSumDistSqr(E, A, D), A, D],
+            [calculateDistance(E, A, B), A, B],
+            [calculateDistance(E, B, C), B, C],
+            [calculateDistance(E, D, C), D, C],
+            [calculateDistance(E, A, D), A, D],
         ].sort((a, b) => a[0] - b[0]);
 
         // console.log("The sorted list is");
