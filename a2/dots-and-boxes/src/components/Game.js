@@ -4,6 +4,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 function Game(props) {
 
+    // get size of board (dots*dots) otherwise by default 4x4 dots
+    const rows = props.rows && props.cols ? props.rows : 4;
+    const cols = props.rows && props.cols ? props.cols : 4;
+
+    // get playerCount otherwise by default 3
+    const playerCount = props.playerCount && props.playerCount > 1 ? props.playerCount : 3;
+
     /*
         The following 2 sources helped me figure how to retrieve dimensions without 'infinite' loop issues.
         // https://bobbyhadz.com/blog/react-get-width-of-element
@@ -33,6 +40,72 @@ function Game(props) {
         };
     }, []);
 
+
+    // this method allows to find which line is closest (the line to be dashed or to be clicked)
+    const [dashedLineCoord, setDashedLineCoord] = useState({ x1: null, y1: null, x2: null, y2: null });
+    const getClosestLineCoordByMouse = () => {
+        // invalid mouse coordinates output null coord entries
+        if (mouseCoord.x < 0 || mouseCoord.x > dimensions.width) {
+            return [null, null, null, null];
+        }
+        if (mouseCoord.y < 0 || mouseCoord.y > dimensions.height) {
+            return [null, null, null, null];
+        }
+
+        // Do calculations in Local Space
+        const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
+        const [x, y] = [Math.max(0, mouseCoord.x - offsetX), Math.max(0, mouseCoord.y - offsetY)];
+        let closestX1 = Math.min(
+            idealWidth / (rows - 1) * (rows - 2),
+            Math.floor(x / idealWidth * (rows - 1)) / (rows - 1) * idealWidth);
+        let closestY1 = Math.min(
+            idealHeight / (cols - 1) * (cols - 2),
+            Math.floor(y / idealHeight * (cols - 1)) / (cols - 1) * idealHeight);
+        let closestX2 = closestX1 + idealWidth / (rows - 1);
+        let closestY2 = closestY1 + idealHeight / (cols - 1);
+
+        // go back to Global Space
+        closestX1 += offsetX;
+        closestY1 += offsetY;
+        closestX2 += offsetX;
+        closestY2 += offsetY;
+
+        // Now we have 2 x and 2 y coordinates whose cartesia product will yield to the 4 points
+        // Those 4 points EXACTLY represent the box in which the line is present
+        // The task is now to see where and which line is closest within that box according to mouse coordinates
+        /* 
+                          A(x1,y1)           B(x2,y1)
+                                 \          /
+                                  \        /
+                                    E(x,y)
+                                  /        \
+                          D(x2,y1)           C(x2,y2)
+        */
+        // So the closest line to E is one of AB,BC,DC,AD
+        // But how do we find the closest one? Well one property is to think about Traingles AEB, BEC, DEC, AED
+        // The triangle with smallest perimeter is the one we can choose.
+        // So the triangle that has the smallest SUM of 2 lines, containing the point E, is where the closest line is located
+        // So, by finding min of EA+EB,EB+EC,EC+ED,ED+EA we can figure out where the smallest line will be
+        // EDGE CASE: what if all sum of lengths are same (so that means E is exactly in center)?
+        // we will just pick one choice, whichever the below code picks first.
+        // for a more detailed explanation please see the code below
+
+        
+
+
+        console.log("Debug getlinebymouse");
+        console.log([closestX1, closestY1, closestX2, closestY2]);
+        return [closestX1, closestY1, closestX2, closestY2];
+    }
+
+    const getClosestLinePointsByMouse = () => {
+
+    }
+    const getLineCoordBetweenPoints = () => {
+
+    }
+
+
     /*
         The TA source of event listener and the following sources helped me figure out and ensure I am properly getting mouse coordinates during mouse movement and click.
 
@@ -52,11 +125,13 @@ function Game(props) {
             x: event.pageX - document.getElementById(props.boardId).offsetLeft,
             y: event.pageY - document.getElementById(props.boardId).offsetTop,
         });
+        const [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse();
+        setDashedLineCoord({ x1: lineX1, y1: lineY1, x2: lineX2, y2: lineY2 });
         // console.log("MouseMove detected for boardId " + props.boardId);
         // console.log(mouseCoord);
         // console.log(event);
     }
-    
+
     const handleMouseClick = (event) => {
         setMouseCoord({
             x: event.pageX - document.getElementById(props.boardId).offsetLeft,
@@ -68,21 +143,30 @@ function Game(props) {
 
     }
 
+    // HISTORY to keep track of all moves. Also allows to go back in history or restart game
+    const [history, setHistory] = useState([{
+        clickedLines: {},
+        playersScore: generatePlayersZeroScore(playerCount),
+    }]);
+    // console.log("Debug history");
+    // console.log(history);
+
     // strictly based on dimensions of svg, we want to draw lines
     // this will ensure that lines are ALWAYS proportional to size of svg (div parent) container.
     // this will make design responsive on change of window size
-    const currWidth = dimensions.width;
-    const currHeight = dimensions.height;
+    const [currWidth, currHeight] = [dimensions.width, dimensions.height];
 
-    // get size of board
-    let rows = props.rows;
-    let cols = props.cols;
-    if (!rows || !cols) {
-        rows = 4;
-        cols = 4;
+
+    const [SCALE_TRANSLATION, SCALE_FACTOR] = [40, 0.80]
+    const idealFittingSize = () => {
+        const idealHeight = Math.max(currHeight * SCALE_FACTOR, currHeight - SCALE_TRANSLATION);
+        const idealWidth = Math.max(currWidth * SCALE_FACTOR, currWidth - SCALE_TRANSLATION);
+        const offsetX = (currWidth - idealWidth) / 2;
+        const offsetY = (currHeight - idealHeight) / 2;
+
+        return [idealWidth, idealHeight, offsetX, offsetY];
     }
 
-    const OFFSET = 40;
     const renderCircles = () => {
         // ignore if width and height are not valid
         if (!currWidth || !currHeight) {
@@ -90,15 +174,14 @@ function Game(props) {
         }
 
         // circles should not be at corners but rather somewhere in middle (but not too much in middle)
-        const customHeight = Math.max(currHeight * 0.8, currHeight - OFFSET);
-        const customWidth = Math.max(currWidth * 0.8, currWidth - OFFSET);
-        const customOffsetX = (currWidth - customWidth) / 2;
-        const customOffsetY = (currHeight - customHeight) / 2;
+
+
+        const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
         let circles = [];
         for (let j = 0; j < cols; j++) {
-            let y = customHeight / (cols - 1) * j + customOffsetY;
+            let y = idealHeight / (cols - 1) * j + offsetY;
             for (let i = 0; i < rows; i++) {
-                let x = customWidth / (rows - 1) * i + customOffsetX;
+                let x = idealWidth / (rows - 1) * i + offsetX;
                 circles.push([x, y]);
             }
         }
@@ -145,6 +228,18 @@ function Game(props) {
 
     }
 
+    const renderDashedLine = () => {
+        const [x1, y1, x2, y2] = [dashedLineCoord.x1, dashedLineCoord.y1, dashedLineCoord.x2, dashedLineCoord.y2];
+
+        if (x1 && y1 && x2 && y2) {
+            console.log("Dashed line is being rendered");
+            return (<line key="dashed-line" x1={x1} x2={x2} y1={y1} y2={y2} strokeDasharray="4" stroke="red" />);
+        }
+        // console.log("Dashed line NOT rendered");
+        // console.log(dashedLineCoord);
+        // console.log([x1, y1, x2, y2]);
+    }
+
 
     return (
         <div className="Game" style={{ backgroundColor: "yellow", width: "50%", padding: "5em", margin: "0.5em" }}>
@@ -153,6 +248,7 @@ function Game(props) {
             <div id={props.boardId} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
                 <svg height="100%" width="100%" style={{ backgroundColor: "cyan" }} >
                     {renderCircles()}
+                    {renderDashedLine()}
                     {renderLines()}
                 </svg>
             </div>
@@ -164,3 +260,11 @@ function Game(props) {
 
 
 export default Game;
+
+function generatePlayersZeroScore(playerCount) {
+    let playersZeroScore = {};
+    for (let i = 0; i < playerCount; i++) {
+        playersZeroScore['player' + i] = 0;
+    }
+    return playersZeroScore;
+}
