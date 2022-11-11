@@ -38,7 +38,6 @@ function Game(props) {
         };
 
         window.addEventListener("resize", handleResize);
-        // TODO: add more event listeners: mouse move and click: is this the right place?
 
         return () => {
             window.removeEventListener("resize", handleResize);
@@ -48,177 +47,6 @@ function Game(props) {
 
     // this method allows to find which line is closest (the line to be dashed or to be clicked)
     const [dashedLineCoord, setDashedLineCoord] = useState({ x1: null, y1: null, x2: null, y2: null });
-    const getClosestLineCoordByMouse = () => {
-        console.log("BEGIN getClosestLineCoordByMouse");
-        // invalid mouse coordinates output null coord entries
-        if (mouseCoord.x < 0 || mouseCoord.x > dimensions.width) {
-            console.log("ERR getClosestLineCoordByMouse: Invalid x coordinates");
-            return [null, null, null, null];
-        }
-        if (mouseCoord.y < 0 || mouseCoord.y > dimensions.height) {
-            console.log("ERR getClosestLineCoordByMouse: Invalid y coordinates");
-            return [null, null, null, null];
-        }
-
-        // Do calculations in Local Space
-        const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
-        console.log("getClosestLineCoordByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
-        console.log([idealWidth, idealHeight, offsetX, offsetY]);
-        const [x, y] = [Math.max(0, mouseCoord.x - offsetX), Math.max(0, mouseCoord.y - offsetY)];
-        console.log("getClosestLineCoordByMouse: [x, y] -offset for local space");
-        console.log([x, y]);
-        let closestX1 = Math.min(
-            idealWidth / (cols - 1) * (cols - 2),
-            Math.floor(x / idealWidth * (cols - 1)) / (cols - 1) * idealWidth);
-        let closestY1 = Math.min(
-            idealHeight / (rows - 1) * (rows - 2),
-            Math.floor(y / idealHeight * (rows - 1)) / (rows - 1) * idealHeight);
-        let closestX2 = closestX1 + idealWidth / (cols - 1);
-        let closestY2 = closestY1 + idealHeight / (rows - 1);
-
-        console.log("getClosestLineCoordByMouse: before global space: [closestX1,Y1,X2,y2");
-        console.log([closestX1, closestY1, closestX2, closestY2]);
-
-        // go back to Global Space
-        closestX1 += offsetX;
-        closestY1 += offsetY;
-        closestX2 += offsetX;
-        closestY2 += offsetY;
-
-        console.log("getClosestLineCoordByMouse: after global space: [closestX1,Y1,X2,y2");
-        console.log([closestX1, closestY1, closestX2, closestY2]);
-        // Now we have 2 x and 2 y coordinates whose cartesia product will yield to the 4 points
-        // Those 4 points EXACTLY represent the box in which the line is present
-        // The task is now to see where and which line is closest within that box according to mouse coordinates
-        /* 
-                          A(x1,y1)           B(x2,y1)
-                                   \  T1     /
-                                    \       /
-                              T4      Mid     T2
-                                    /      \   ->E(x,y)
-                                   /  T3    \
-                          D(x2,y1)           C(x2,y2)
-        */
-        // So the closest line to E is one of AB,BC,DC,AD
-        // But how do we find the closest one? Well one property is to think about in which of the 4 triangles (T1,T2,T3,T4) the point E lies in
-        // EDGE CASE: what if E == Mid?
-        // we will just pick one choice, whichever the below code picks first.
-
-
-        const getLineByTriangleContainingPoint = (E, A, B, C, D) => {
-            const isPointinTriangle = (e, p0, p1, p2) => {
-                // This boolean method is from the following source:
-                // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
-                const s = (p0[0] - p2[0]) * (e[1] - p2[1]) - (p0[1] - p2[1]) * (e[0] - p2[0]);
-                const t = (p1[0] - p0[0]) * (e[1] - p0[1]) - (p1[1] - p0[1]) * (e[0] - p0[0]);
-
-                if ((s < 0) != (t < 0) && s != 0 && t != 0)
-                    return false;
-
-                var d = (p2[0] - p1[0]) * (e[1] - p1[1]) - (p2[1] - p1[1]) * (e[0] - p1[0]);
-                return d == 0 || (d < 0) == (s + t <= 0);
-            }
-
-            // get center of rectangle
-            const M = [(A[0] + B[0]) / 2, (A[1] + D[1]) / 2];
-            // if point E is one of the triangle then return the appriate line coordinates
-            if (isPointinTriangle(E, A, M, B)) {
-                return [A[0], A[1], B[0], B[1]];
-            }
-            else if (isPointinTriangle(E, B, M, C)) {
-                return [B[0], B[1], C[0], C[1]];
-            }
-            else if (isPointinTriangle(E, D, M, C)) {
-                return [D[0], D[1], C[0], C[1]];
-
-            } else if (isPointinTriangle(E, A, M, D)) {
-                return [A[0], A[1], D[0], D[1]];
-
-            }
-
-            // otherwise return null coordinates since point is outside the square, so inside none of the triangles
-            return [null, null, null, null];
-        }
-        const E = [mouseCoord.x, mouseCoord.y];
-        const A = [closestX1, closestY1];
-        const B = [closestX2, closestY1];
-        const C = [closestX2, closestY2];
-        const D = [closestX1, closestY2];
-
-        const [lineX1, lineY1, lineX2, lineY2] = getLineByTriangleContainingPoint(E, A, B, C, D).map((num) => dPR(num * 10) / 10);
-        console.log("getClosestLineCoordByMouse: FINAL OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
-        console.log([lineX1, lineY1, lineX2, lineY2]);
-        return [lineX1, lineY1, lineX2, lineY2];
-    }
-
-    const getClosestLinePointsByMouse = () => {
-        console.log("BEGIN getClosestLinePointsByMouse");
-        let [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse();
-        console.log("back to getClosestLinePointsByMouse");
-        // convert line coordinates to point coordinates
-        if (lineX1 && lineY1 && lineX2 && lineY2) {
-            console.log("getClosestLinePointsByMouse: successful entering of if");
-            // PROBLEM: java precision floating is messing up at edge cases. example: Math.floor(0.9999/1.0) = 0 instead of 1
-            // [lineX1, lineY1, lineX2, lineY2] = [lineX1, lineY1, lineX2, lineY2].map((num) => dPR(num);
-            // TODO: do calculations in local space first
-            const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
-
-            console.log("getClosestLinePointsByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
-            console.log([idealWidth, idealHeight, offsetX, offsetY]);
-
-            lineX1 = Math.max(0, dPR(lineX1 - offsetX));
-            lineY1 = Math.max(0, dPR(lineY1 - offsetY));
-            lineX2 = Math.max(0, dPR(lineX2 - offsetX));
-            lineY2 = Math.max(0, dPR(lineY2 - offsetY));
-            console.log("getClosestLinePointsByMouse: offset to local space: [lineX1, lineY1, lineX2, lineY2]");
-            console.log([lineX1, lineY1, lineX2, lineY2]);
-
-            const x1 = Math.floor(lineX1 / idealWidth * (cols - 1));
-            const y1 = Math.floor(lineY1 / idealHeight * (rows - 1));
-            const x2 = Math.floor(lineX2 / idealWidth * (cols - 1));
-            const y2 = Math.floor(lineY2 / idealHeight * (rows - 1));
-            console.log("getClosestLinePointsByMouse: FINAL OUPTUT: [x1, y1, x2, y2]");
-            console.log([x1, y1, x2, y2]);
-            return [x1, y1, x2, y2];
-        }
-
-        // return null if invalid mouse coordinates (or outside all boxes)
-        console.log("FAILED getClosestLinePointsByMouse: output null");
-        return [null, null, null, null];
-
-    }
-    const getLineCoordBetweenPoints = ([x1, y1, x2, y2]) => {
-        console.log("BEGIN getLineCoordBetweenPoints");
-        console.log("INPUT: [x1, y1, x2, y2]");
-        console.log([x1, y1, x2, y2]);
-        // ensure x \in [mod rows] and y \in [mod cols]
-        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) {
-            console.log("getLineCoordBetweenPoints: INVALID < 0");
-            return [null, null, null, null];
-        }
-        if (x1 > cols - 1 || y1 > rows - 1 || x2 > cols - 1 || y2 > rows - 1) {
-            console.log("getLineCoordBetweenPoints: INVALID > limitsize");
-            return [null, null, null, null];
-        }
-
-        // Coordinates must be calculated in local space than offset to global
-        const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
-        console.log("getLineCoordBetweenPoints: [idealWidth, idealHeight, offsetX, offsetY]");
-        console.log("[idealWidth, idealHeight, offsetX, offsetY]");
-        let lineX1 = x1 / (cols - 1) * idealWidth + offsetX;
-        let lineY1 = y1 / (rows - 1) * idealHeight + offsetY;
-        let lineX2 = x2 / (cols - 1) * idealWidth + offsetX;
-        let lineY2 = y2 / (rows - 1) * idealHeight + offsetY;
-
-        console.log("getLineCoordBetweenPoints: FINAL STAGE");
-        console.log("INPUT:  [x1, y1, x2, y2]");
-        console.log([x1, y1, x2, y2]);
-        console.log("OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
-        console.log([lineX1, lineY1, lineX2, lineY2]);
-        // return line coordnates, in Global Space
-        return [lineX1, lineY1, lineX2, lineY2];
-    }
-
 
     /*
         The TA source of event listener and the following sources helped me figure out and ensure I am properly getting mouse coordinates during mouse movement and click.
@@ -239,7 +67,7 @@ function Game(props) {
             x: event.pageX - document.getElementById(props.boardId).offsetLeft,
             y: event.pageY - document.getElementById(props.boardId).offsetTop,
         });
-        const [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse();
+        const [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse([rows, cols], dimensions, mouseCoord);
         setDashedLineCoord({ x1: lineX1, y1: lineY1, x2: lineX2, y2: lineY2 });
         // console.log("MouseMove detected for boardId " + props.boardId);
         // console.log(mouseCoord);
@@ -270,7 +98,7 @@ function Game(props) {
         const currentStatus = history[history.length - 1];
         const newClickedLines = { ...currentStatus.clickedLines };
 
-        const [x1, y1, x2, y2] = getClosestLinePointsByMouse();
+        const [x1, y1, x2, y2] = getClosestLinePointsByMouse([rows, cols], dimensions, mouseCoord);
         if ([x1, y1, x2, y2].includes(null)) {
             return;
         }
@@ -309,19 +137,6 @@ function Game(props) {
     // this will make design responsive on change of window size
     const [currWidth, currHeight] = [dimensions.width, dimensions.height];
 
-
-    const [SCALE_TRANSLATION, SCALE_FACTOR] = [40, 0.80]
-    const idealFittingSize = () => {
-        const idealHeight = Math.max(currHeight * SCALE_FACTOR, currHeight - SCALE_TRANSLATION);
-        const idealWidth = Math.max(currWidth * SCALE_FACTOR, currWidth - SCALE_TRANSLATION);
-        // Offsets will be rounded to some precision level
-        // Otherwise they cause floating precission accuracies problem in javascript, which will later cause to get improper (Math.floor will round to a value lower by 1) calculations in converting coordinates to points and vice versa
-        const offsetX = dPR((currWidth - idealWidth) / 2);
-        const offsetY = dPR((currHeight - idealHeight) / 2);
-
-        return [idealWidth, idealHeight, offsetX, offsetY];
-    }
-
     const renderCircles = () => {
         // ignore if width and height are not valid
         if (!currWidth || !currHeight) {
@@ -331,7 +146,7 @@ function Game(props) {
         // circles should not be at corners but rather somewhere in middle (but not too much in middle)
 
 
-        const [idealWidth, idealHeight, offsetX, offsetY] = idealFittingSize();
+        const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
         let circles = [];
         for (let j = 0; j < rows; j++) {
             let y = idealHeight / (rows - 1) * j + offsetY;
@@ -355,7 +170,7 @@ function Game(props) {
         const linesPoints = history[history.length - 1].clickedLines;
         Object.entries(linesPoints).forEach(([key, turnValue]) => {
             const [px1, py1, px2, py2] = key.split('-').map((strnum) => parseInt(strnum));
-            const [lineX1, lineY1, lineX2, lineY2] = getLineCoordBetweenPoints([px1, py1, px2, py2]);
+            const [lineX1, lineY1, lineX2, lineY2] = getLineCoordBetweenPoints([px1, py1, px2, py2], [rows, cols], dimensions);
             lines.push([lineX1, lineY1, lineX2, lineY2, turnValue]);
 
         })
@@ -405,7 +220,7 @@ function Game(props) {
 
 export default Game;
 
-function generatePlayersZeroScore(playerCount) {
+const generatePlayersZeroScore = (playerCount) => {
     let playersZeroScore = {};
     for (let i = 0; i < playerCount; i++) {
         playersZeroScore['player' + i] = 0;
@@ -419,4 +234,189 @@ const dPR = (num) => {
     // suppose 0.3333...3 is the MINIMUM THRESHOLD to reaching something
     // 0.4 is more safer than 0.3, as 0.4 exceed MINIMUM THRESHOLD but 0.3 is below it.
     return Math.ceil(num * 10) / 10;
+}
+
+// getIdealDrawingArea: svg element should fit in an area slightly shrinked, away from corners. This is to prevent elementnts, such as dots/circles to be partially not visible at corners.
+const [SCALE_TRANSLATION, SCALE_FACTOR] = [40, 0.80];
+const getIdealDrawingArea = (dimensions) => {
+    const currWidth = dimensions.width;
+    const currHeight = dimensions.height;
+    const idealHeight = Math.max(currHeight * SCALE_FACTOR, currHeight - SCALE_TRANSLATION);
+    const idealWidth = Math.max(currWidth * SCALE_FACTOR, currWidth - SCALE_TRANSLATION);
+    // Offsets will be rounded to some precision level
+    // Otherwise they cause floating precission accuracies problem in javascript, which will later cause to get improper (Math.floor will round to a value lower by 1) calculations in converting coordinates to points and vice versa
+    const offsetX = dPR((currWidth - idealWidth) / 2);
+    const offsetY = dPR((currHeight - idealHeight) / 2);
+
+    return [idealWidth, idealHeight, offsetX, offsetY];
+}
+
+const getClosestLineCoordByMouse = ([rows, cols], dimensions, mouseCoord) => {
+    console.log("BEGIN getClosestLineCoordByMouse");
+    // invalid mouse coordinates output null coord entries
+    if (mouseCoord.x < 0 || mouseCoord.x > dimensions.width) {
+        console.log("ERR getClosestLineCoordByMouse: Invalid x coordinates");
+        return [null, null, null, null];
+    }
+    if (mouseCoord.y < 0 || mouseCoord.y > dimensions.height) {
+        console.log("ERR getClosestLineCoordByMouse: Invalid y coordinates");
+        return [null, null, null, null];
+    }
+
+    // Do calculations in Local Space
+    const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
+    console.log("getClosestLineCoordByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
+    console.log([idealWidth, idealHeight, offsetX, offsetY]);
+    const [x, y] = [Math.max(0, mouseCoord.x - offsetX), Math.max(0, mouseCoord.y - offsetY)];
+    console.log("getClosestLineCoordByMouse: [x, y] -offset for local space");
+    console.log([x, y]);
+    let closestX1 = Math.min(
+        idealWidth / (cols - 1) * (cols - 2), // 2nd last (last is not allowed: that will be closestX2)
+        Math.floor(x / idealWidth * (cols - 1)) / (cols - 1) * idealWidth);
+    let closestY1 = Math.min(
+        idealHeight / (rows - 1) * (rows - 2), // 2nd last (last is not allowed: that will be closestY2)
+        Math.floor(y / idealHeight * (rows - 1)) / (rows - 1) * idealHeight);
+    let closestX2 = closestX1 + idealWidth / (cols - 1);
+    let closestY2 = closestY1 + idealHeight / (rows - 1);
+
+    console.log("getClosestLineCoordByMouse: before global space: [closestX1,Y1,X2,y2");
+    console.log([closestX1, closestY1, closestX2, closestY2]);
+
+    // go back to Global Space
+    closestX1 += offsetX;
+    closestY1 += offsetY;
+    closestX2 += offsetX;
+    closestY2 += offsetY;
+
+    console.log("getClosestLineCoordByMouse: after global space: [closestX1,Y1,X2,y2");
+    console.log([closestX1, closestY1, closestX2, closestY2]);
+    // Now we have 2 x and 2 y coordinates whose cartesian product will yield to the 4 points
+    // Those 4 points EXACTLY represent the box in which the line is present
+    // The task is now to see where and which line is closest within that box according to mouse coordinates
+    /* 
+                      A(x1,y1)           B(x2,y1)
+                               \  T1     /
+                                \       /
+                          T4      Mid     T2
+                                /      \   ->E(x,y)
+                               /  T3    \
+                      D(x2,y1)           C(x2,y2)
+    */
+    // So the closest line to E is one of AB,BC,DC,AD
+    // But how do we find the closest one? Well one property is to think about in which of the 4 triangles (T1,T2,T3,T4) the point E lies in
+    // EDGE CASE: what if E == Mid?
+    // we will just pick one choice, whichever the below code picks first.
+
+
+    const getLineByTriangleContainingPoint = (E, A, B, C, D) => {
+        const isPointinTriangle = (e, p0, p1, p2) => {
+            // This boolean method is from the following source:
+            // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
+            const s = (p0[0] - p2[0]) * (e[1] - p2[1]) - (p0[1] - p2[1]) * (e[0] - p2[0]);
+            const t = (p1[0] - p0[0]) * (e[1] - p0[1]) - (p1[1] - p0[1]) * (e[0] - p0[0]);
+
+            if ((s < 0) != (t < 0) && s != 0 && t != 0)
+                return false;
+
+            var d = (p2[0] - p1[0]) * (e[1] - p1[1]) - (p2[1] - p1[1]) * (e[0] - p1[0]);
+            return d == 0 || (d < 0) == (s + t <= 0);
+        }
+
+        // get center of rectangle
+        const M = [(A[0] + B[0]) / 2, (A[1] + D[1]) / 2];
+        // if point E is one of the triangle then return the appriate line coordinates
+        if (isPointinTriangle(E, A, M, B)) {
+            return [A[0], A[1], B[0], B[1]];
+        }
+        else if (isPointinTriangle(E, B, M, C)) {
+            return [B[0], B[1], C[0], C[1]];
+        }
+        else if (isPointinTriangle(E, D, M, C)) {
+            return [D[0], D[1], C[0], C[1]];
+
+        } else if (isPointinTriangle(E, A, M, D)) {
+            return [A[0], A[1], D[0], D[1]];
+
+        }
+
+        // otherwise return null coordinates since point is outside the square, so inside none of the triangles
+        return [null, null, null, null];
+    }
+    const E = [mouseCoord.x, mouseCoord.y];
+    const A = [closestX1, closestY1];
+    const B = [closestX2, closestY1];
+    const C = [closestX2, closestY2];
+    const D = [closestX1, closestY2];
+
+    const [lineX1, lineY1, lineX2, lineY2] = getLineByTriangleContainingPoint(E, A, B, C, D).map(dPR);
+    console.log("getClosestLineCoordByMouse: FINAL OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
+    console.log([lineX1, lineY1, lineX2, lineY2]);
+    return [lineX1, lineY1, lineX2, lineY2];
+}
+
+const getClosestLinePointsByMouse = ([rows, cols], dimensions, mouseCoord) => {
+    console.log("BEGIN getClosestLinePointsByMouse");
+    let [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse([rows, cols], dimensions, mouseCoord);
+    console.log("back to getClosestLinePointsByMouse");
+    // convert line coordinates to point coordinates
+    if (![lineX1, lineY1, lineX2, lineY2].includes(null)) {
+        console.log("getClosestLinePointsByMouse: successful entering of if");
+        // do calculations in local space
+        const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
+
+        console.log("getClosestLinePointsByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
+        console.log([idealWidth, idealHeight, offsetX, offsetY]);
+
+        lineX1 = Math.max(0, dPR(lineX1 - offsetX));
+        lineY1 = Math.max(0, dPR(lineY1 - offsetY));
+        lineX2 = Math.max(0, dPR(lineX2 - offsetX));
+        lineY2 = Math.max(0, dPR(lineY2 - offsetY));
+        console.log("getClosestLinePointsByMouse: offset to local space: [lineX1, lineY1, lineX2, lineY2]");
+        console.log([lineX1, lineY1, lineX2, lineY2]);
+
+        const x1 = Math.floor(lineX1 / idealWidth * (cols - 1));
+        const y1 = Math.floor(lineY1 / idealHeight * (rows - 1));
+        const x2 = Math.floor(lineX2 / idealWidth * (cols - 1));
+        const y2 = Math.floor(lineY2 / idealHeight * (rows - 1));
+        console.log("getClosestLinePointsByMouse: FINAL OUPTUT: [x1, y1, x2, y2]");
+        console.log([x1, y1, x2, y2]);
+        return [x1, y1, x2, y2];
+    }
+
+    // return null if invalid mouse coordinates (or outside all boxes)
+    console.log("FAILED getClosestLinePointsByMouse: output null");
+    return [null, null, null, null];
+
+}
+
+const getLineCoordBetweenPoints = ([x1, y1, x2, y2], [rows, cols], dimensions) => {
+    console.log("BEGIN getLineCoordBetweenPoints");
+    console.log("INPUT: [x1, y1, x2, y2]");
+    console.log([x1, y1, x2, y2]);
+    // ensure x \in [mod rows] and y \in [mod cols]
+    if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) {
+        console.log("getLineCoordBetweenPoints: INVALID < 0");
+        return [null, null, null, null];
+    }
+    if (x1 > cols - 1 || y1 > rows - 1 || x2 > cols - 1 || y2 > rows - 1) {
+        console.log("getLineCoordBetweenPoints: INVALID > limitsize");
+        return [null, null, null, null];
+    }
+
+    // Coordinates must be calculated in local space than offset to global
+    const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
+    console.log("getLineCoordBetweenPoints: [idealWidth, idealHeight, offsetX, offsetY]");
+    console.log("[idealWidth, idealHeight, offsetX, offsetY]");
+    let lineX1 = x1 / (cols - 1) * idealWidth + offsetX;
+    let lineY1 = y1 / (rows - 1) * idealHeight + offsetY;
+    let lineX2 = x2 / (cols - 1) * idealWidth + offsetX;
+    let lineY2 = y2 / (rows - 1) * idealHeight + offsetY;
+    [lineX1, lineY1, lineX2, lineY2] = [lineX1, lineY1, lineX2, lineY2].map(dPR);
+    console.log("getLineCoordBetweenPoints: FINAL STAGE");
+    console.log("INPUT:  [x1, y1, x2, y2]");
+    console.log([x1, y1, x2, y2]);
+    console.log("OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
+    console.log([lineX1, lineY1, lineX2, lineY2]);
+    // return line coordnates, in Global Space
+    return [lineX1, lineY1, lineX2, lineY2];
 }
