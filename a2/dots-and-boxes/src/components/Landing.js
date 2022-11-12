@@ -50,6 +50,9 @@ function Landing(props) {
 
     }
     return (
+        // idea: maybe also make the input as a list of options to choose
+        // idea2: maybe use arrow keys to let user increment decrement rows or cols count with taps, beside just typing
+        // if more time allows, one of the ideas above can be implemented
         <div className="Landing">
             <input className="input-field" name="numRows" placeholder="Enter # of rows ..." onChange={(event) => setRows(event.target.value)} />
             <input className="input-field" name="numCols" placeholder="Enter # of columns ..." onChange={(event) => setColumns(event.target.value)} />

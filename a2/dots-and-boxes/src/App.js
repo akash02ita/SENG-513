@@ -14,11 +14,12 @@ function App() {
 
   // state: 0-> landing, 1-> game, 2-> stats
   const [state, setState] = useState(0);
-  const [args, setArgs] = useState(null);
+  const [statArgs, setStatArgs] = useState(null);
+  const [gameArgs, setGameArgs] = useState(null);
   const [history, setHistory] = useState({});
 
   const handleStartGame = (rows, cols, playerCount) => {
-    setArgs({
+    setGameArgs({
       rows: rows,
       cols: cols,
       playerCount: playerCount,
@@ -26,23 +27,26 @@ function App() {
     setState(1);
   }
 
-  // const handleEndGame = (history) => {
-  //   // TODO: not fully implemented yet
-  //   setArgs({
-  //     history: history,
-  //   })
-  //   setState(2);
-  // }
-  
-  // const handleRestartGame = () => {
-  //   // TODO: not fully implemented yet
-  //   setState(0);
-  // }
+  const handleEndGame = (history) => {
+    console.log("App received history");
+    console.log(history);
+    // set the args without loosing the previous ones (this will allow user to restart game with same args)
+    setStatArgs({ history: history });
+    setState(2);
+  }
+
+  const handleRestartGame = () => {
+    setState(1);
+  }
+
+  const handleGoToLanding = () => {
+    setState(0);
+  }
 
   if (state === 0) {
     return (
       <div className="App">
-        <Landing handleStartGame={handleStartGame} maxPlayerCount={6}/>
+        <Landing handleStartGame={handleStartGame} maxPlayerCount={colors.length} />
       </div>
     );
   }
@@ -50,14 +54,14 @@ function App() {
     console.log("again");
     return (
       <div className="App">
-        <Game boardId="uniqueBoard1" rows={args.rows} cols={args.cols} playerCount={args.playerCount} />
+        <Game boardId="uniqueBoard1" rows={gameArgs.rows} cols={gameArgs.cols} playerCount={gameArgs.playerCount} colors={colors} handleEndGame={handleEndGame} />
       </div>
     );
   }
   if (state === 2) {
     return (
       <div className="App">
-        <Stats />
+        <Stats historyGame={statArgs.history} handleRestartGame={handleRestartGame} handleGoToLanding={handleGoToLanding} />
       </div>
     );
   }
@@ -71,3 +75,4 @@ function App() {
 }
 
 export default App;
+const colors = ["red", "green", "blue", "yellow", "orange", "pink", "purple"];

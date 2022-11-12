@@ -1,15 +1,14 @@
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 // TODO: rename this to Board.js
 
 function Game(props) {
-    console.log("Recevied props as ");
-    console.log(props);
     // get size of board (dots*dots) otherwise by default 4x4 dots
     const rows = props.rows && props.cols && props.rows > 1 && props.cols > 1 && props.rows <= 10 && props.cols <= 10 ? props.rows : 4; // number of dots horizontally
     const cols = props.rows && props.cols && props.rows > 1 && props.cols > 1 && props.rows <= 10 && props.cols <= 10 ? props.cols : 4; // number of dots vertically
-    const playerColors = ["red", "green", "blue", "yellow", "orange", "pink", "purple"];
+    const playerColors = props.colors ? props.colors : ["red", "green", "blue", "yellow", "orange", "pink", "purple"];
     const totalLines = (rows) * (cols - 1) + (cols) * (rows - 1);
+    const totalBoxes = (rows - 1) * (cols - 1);
     const maxPlayerCount = Math.min(totalLines, playerColors.length);
 
     // get playerCount otherwise by default 3
@@ -116,7 +115,7 @@ function Game(props) {
             // console.log(foundCompletedBoxes);
             // console.log(newClickedLines);
             // score increases only if at last 1 box is completed
-            newPlayesScore[currentStatus.turn] += foundCompletedBoxes.length;
+            newPlayesScore['player' + currentStatus.turn] += foundCompletedBoxes.length;
             foundCompletedBoxes.forEach((startPointRect) => {
                 const keystartPointRect = startPointRect.join('-');
                 if (keystartPointRect in newCompletedBoxes) {
@@ -135,21 +134,26 @@ function Game(props) {
         }
 
 
-        const gameCompletedFlag = Object.keys(newCompletedBoxes).length === totalLines;
-
-        setHistory(history.concat({
-            clickedLines: newClickedLines,
-            completedBoxes: newCompletedBoxes,
-            playersScore: newPlayesScore,
-            turn: newTurn,
-        }))
+        const gameCompletedFlag = Object.keys(newCompletedBoxes).length === totalBoxes;
 
         if (gameCompletedFlag) {
             console.log("handleMouseClick: Game is completed");
             // NOTE: win or tie can happen (sort playerscore)
             // TODO: call parent function and pass history to display statistics (App component will do that probably)
             // stats.js WILL handle how to display results and stats
-
+            props.handleEndGame(history.concat({
+                clickedLines: newClickedLines,
+                completedBoxes: newCompletedBoxes,
+                playersScore: newPlayesScore,
+                turn: newTurn,
+            }));
+        } else {
+            setHistory(history.concat({
+                clickedLines: newClickedLines,
+                completedBoxes: newCompletedBoxes,
+                playersScore: newPlayesScore,
+                turn: newTurn,
+            }))
         }
 
     }
@@ -253,11 +257,28 @@ function Game(props) {
 
     }
 
+    const renderPlayersSCore = () => {
+        const currentStatus = history[history.length - 1];
+        const playersScore = currentStatus.playersScore;
+        const divPlayersScore = Object.entries(playersScore).map(([playerName, playersScore]) => {
+            return (
+                <div key={playerName} className="player-score">
+                    {playerName} : {playersScore}
+                </div>
+            );
+        });
+        return (<div className="players-score-list">
+            Here the score of all the players:
+            {divPlayersScore}
+        </div>);
+    }
+
 
     return (
         <div className="Game" style={{ backgroundColor: "yellow", width: "50%", padding: "5em", margin: "0.5em" }}>
-            <p>This is an svg file</p>
-            <p>window inner width {window.innerWidth}</p>
+            <div className="current-turn">
+                Current turn: player{history[history.length - 1].turn}
+            </div>
             <div id={props.boardId} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
                 <svg height="100%" width="100%" style={{ backgroundColor: "cyan" }} >
                     {/* rendering order matters (circles/dots should be in front) */}
@@ -268,8 +289,7 @@ function Game(props) {
                     {renderCircles()}
                 </svg>
             </div>
-            <p style={{ width: "50%" }}>In Game.js svgDiv width is {currWidth}</p>
-            <p>Mouse coordinates are {mouseCoord.x} and {mouseCoord.y}</p>
+            {renderPlayersSCore()}
         </div>
     );
 }
