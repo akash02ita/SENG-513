@@ -1,6 +1,5 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
-// TODO: rename this to Board.js
 
 function Game(props) {
     // get size of board (dots*dots) otherwise by default 4x4 dots
@@ -84,7 +83,7 @@ function Game(props) {
         // console.log(event);
 
         /* 
-        TODO: UPDATE:
+        UPDATE:
         - turn: which is a numberic number \in [mod playerCount]
         - lines to draw
         - make a list of colors
@@ -156,6 +155,13 @@ function Game(props) {
             }))
         }
 
+    }
+
+    const handleUndoStep = () => {
+        if (history.length === 1) {
+            return;
+        }
+        setHistory(history.slice(0, history.length - 1));
     }
 
     // HISTORY to keep track of all moves. Also allows to go back in history or restart game
@@ -261,8 +267,9 @@ function Game(props) {
         const currentStatus = history[history.length - 1];
         const playersScore = currentStatus.playersScore;
         const divPlayersScore = Object.entries(playersScore).map(([playerName, playersScore]) => {
+            const playerClr = playerColors[parseInt(playerName.split('player')[1])];
             return (
-                <div key={playerName} className="player-score">
+                <div key={playerName} className="player-score" style={{ color: playerClr }}>
                     {playerName} : {playersScore}
                 </div>
             );
@@ -275,12 +282,12 @@ function Game(props) {
 
 
     return (
-        <div className="Game" style={{ backgroundColor: "yellow", width: "50%", padding: "5em", margin: "0.5em" }}>
+        <div className="Game">
             <div className="current-turn">
                 Current turn: player{history[history.length - 1].turn}
             </div>
             <div id={props.boardId} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
-                <svg height="100%" width="100%" style={{ backgroundColor: "cyan" }} >
+                <svg>
                     {/* rendering order matters (circles/dots should be in front) */}
                     {/* renderCompletedBoxes RECTANGLES WITH SEMI-TRANSPARENT COLOR: do transparancy in sCSS */}
                     {renderCompletedBoxes()}
@@ -289,6 +296,7 @@ function Game(props) {
                     {renderCircles()}
                 </svg>
             </div>
+            <button onClick={handleUndoStep}>Undo step</button>
             {renderPlayersSCore()}
         </div>
     );

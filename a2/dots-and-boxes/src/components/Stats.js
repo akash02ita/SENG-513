@@ -3,6 +3,7 @@
 function Stats(props) {
     const historyGame = props.historyGame;
     const lastStatus = historyGame[historyGame.length - 1];
+    const playerColors = props.colors ? props.colors : ["red", "green", "blue", "yellow", "orange", "pink", "purple"];
 
     const renderGameStatus = () => {
         const playersScore = { ...lastStatus.playersScore };
@@ -19,7 +20,7 @@ function Stats(props) {
         return (<div className="player-winner-list">
             Ladies and Gentlement, we would like to show you that the {winner_s} {is_are}:
             {divWinners}
-            <div className="score">
+            <div className="max-score">
                 Highest Score achieved by the {winner_s}: {maxScore}
             </div>
         </div>);
@@ -28,8 +29,9 @@ function Stats(props) {
     const renderPlayersSCore = () => {
         const playersScore = lastStatus.playersScore;
         const divPlayersScore = Object.entries(playersScore).map(([playerName, playersScore]) => {
+            const playerClr = playerColors[parseInt(playerName.split('player')[1])];
             return (
-                <div key={playerName} className="player-score">
+                <div key={playerName} className="player-score" style={{color: playerClr}}>
                     {playerName} : {playersScore}
                 </div>
             );

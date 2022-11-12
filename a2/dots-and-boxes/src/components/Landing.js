@@ -30,7 +30,7 @@ function Landing(props) {
             alert("Invalid rows and/or columns value");
             return;
         }
-        if (checkRows > 10 || checkCols > 10) {            
+        if (checkRows > 10 || checkCols > 10) {
             alert("At most 10 rows and columns are allowed.");
             return;
         }
@@ -60,9 +60,14 @@ function Landing(props) {
             <button className="input-button" onClick={handleStartGame}>Start game</button>
             <div className="input-instructions">
                 {/* ADD INSTRUCTIONS OVER HERE: how inputs are valid */}
+                <p>Welcome to the Game!</p>
+                <p>Here a few rules:</p>
+                <p>Minimum size is 2x2</p>
             </div>
             <div className="game-instructions">
                 {/* ADD INSTRUCTIONS OVER HERE: how inputs are valid */}
+                <p>Just click a line at a time!</p>
+                <p>If you fill a box you get another turn!</p>
             </div>
         </div>
     );

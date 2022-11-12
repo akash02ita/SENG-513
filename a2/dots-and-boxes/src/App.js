@@ -1,5 +1,3 @@
-// import logo from './logo.svg';
-// import './App.css';
 // probably use index.css as the global css file: assignment requires exactly one css styles sheet to be used
 
 
@@ -16,7 +14,6 @@ function App() {
   const [state, setState] = useState(0);
   const [statArgs, setStatArgs] = useState(null);
   const [gameArgs, setGameArgs] = useState(null);
-  const [history, setHistory] = useState({});
 
   const handleStartGame = (rows, cols, playerCount) => {
     setGameArgs({
@@ -61,7 +58,7 @@ function App() {
   if (state === 2) {
     return (
       <div className="App">
-        <Stats historyGame={statArgs.history} handleRestartGame={handleRestartGame} handleGoToLanding={handleGoToLanding} />
+        <Stats historyGame={statArgs.history} handleRestartGame={handleRestartGame} handleGoToLanding={handleGoToLanding} colors={colors}/>
       </div>
     );
   }
