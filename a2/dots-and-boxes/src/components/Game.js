@@ -110,13 +110,34 @@ function Game(props) {
 
         newClickedLines[key] = currentStatus.turn;
         const newPlayesScore = { ...currentStatus.playersScore };
-
-        // TODO: score increases only if a box is completed
-        newPlayesScore[currentStatus.turn] += 1;
-        const newTurn = (currentStatus.turn + 1) % playerCount;
+        let newCompletedBoxes = { ...currentStatus.completedBoxes };
+        const foundCompletedBoxes = findNewCompletedBoxes([rows, cols], [x1, y1, x2, y2], newClickedLines);
+        let newTurn;
+        if (foundCompletedBoxes) {
+            console.log(foundCompletedBoxes);
+            console.log(newClickedLines);
+            // score increases only if at last 1 box is completed
+            newPlayesScore[currentStatus.turn] += foundCompletedBoxes.length;
+            foundCompletedBoxes.forEach((startPointRect) => {
+                const keystartPointRect = startPointRect.join('-');
+                if (keystartPointRect in newCompletedBoxes) {
+                    console.log("ERROR: handleMouseClick: keystartPointRect already present in newCompletedBoxes");
+                    // console.log(keystartPointRect);
+                    // console.log(newCompletedBoxes);
+                }
+                newCompletedBoxes[keystartPointRect] = currentStatus.turn;
+            });
+            // player turn remains same: same player must click a line again
+            newTurn = currentStatus.turn;
+        }
+        else {
+            // player turn changes only when a box is not completed
+            newTurn = (currentStatus.turn + 1) % playerCount;
+        }
 
         setHistory(history.concat({
             clickedLines: newClickedLines,
+            completedBoxes: newCompletedBoxes,
             playersScore: newPlayesScore,
             turn: newTurn,
         }))
@@ -126,6 +147,7 @@ function Game(props) {
     const firstTurn = props.firstTurn ? props.firstTurn : 0;
     const [history, setHistory] = useState([{
         clickedLines: {},
+        completedBoxes: {},
         playersScore: generatePlayersZeroScore(playerCount),
         turn: firstTurn,
     }]);
@@ -173,7 +195,7 @@ function Game(props) {
             const [lineX1, lineY1, lineX2, lineY2] = getLineCoordBetweenPoints([px1, py1, px2, py2], [rows, cols], dimensions);
             lines.push([lineX1, lineY1, lineX2, lineY2, turnValue]);
 
-        })
+        });
 
         const svgLines = lines.map(([lineX1, lineY1, lineX2, lineY2, turnValue]) => {
             return (
@@ -198,6 +220,28 @@ function Game(props) {
         // console.log([x1, y1, x2, y2]);
     }
 
+    const renderCompletedBoxes = () => {
+        const currentStatus = history[history.length - 1];
+        const completedBoxesRectangles = [];
+
+        const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
+        const rectWidth = dPR(idealWidth / (cols - 1));
+        const rectHeight = dPR(idealHeight / (rows - 1));
+
+        Object.entries(currentStatus.completedBoxes).forEach(([key, turnValue]) => {
+            const [startPX, startPY] = key.split('-').map((strnum) => parseInt(strnum));
+            const rectOffsetX = dPR(startPX / (cols - 1) * idealWidth + offsetX);
+            const rectOffsetY = dPR(startPY / (rows - 1) * idealHeight + offsetY);
+            completedBoxesRectangles.push([rectOffsetX, rectOffsetY, turnValue]);
+        });
+
+        const svgCompletedBoxesRectangles = completedBoxesRectangles.map(([rectOffsetX, rectOffsetY, turnValue]) => {
+            return (<rect key={[rectOffsetX, rectOffsetY].join('-')} x={rectOffsetX} y={rectOffsetY} width={rectWidth} height={rectHeight} style={{fill: playerColors[turnValue]}} />);
+        });
+        return svgCompletedBoxesRectangles;
+
+    }
+
 
     return (
         <div className="Game" style={{ backgroundColor: "yellow", width: "50%", padding: "5em", margin: "0.5em" }}>
@@ -206,6 +250,8 @@ function Game(props) {
             <div id={props.boardId} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
                 <svg height="100%" width="100%" style={{ backgroundColor: "cyan" }} >
                     {/* rendering order matters (circles/dots should be in front) */}
+                    {/* renderCompletedBoxes RECTANGLES WITH SEMI-TRANSPARENT COLOR: do transparancy in sCSS */}
+                    {renderCompletedBoxes()}
                     {renderDashedLine()}
                     {renderLines()}
                     {renderCircles()}
@@ -252,24 +298,24 @@ const getIdealDrawingArea = (dimensions) => {
 }
 
 const getClosestLineCoordByMouse = ([rows, cols], dimensions, mouseCoord) => {
-    console.log("BEGIN getClosestLineCoordByMouse");
+    // console.log("BEGIN getClosestLineCoordByMouse");
     // invalid mouse coordinates output null coord entries
     if (mouseCoord.x < 0 || mouseCoord.x > dimensions.width) {
-        console.log("ERR getClosestLineCoordByMouse: Invalid x coordinates");
+        // console.log("ERR getClosestLineCoordByMouse: Invalid x coordinates");
         return [null, null, null, null];
     }
     if (mouseCoord.y < 0 || mouseCoord.y > dimensions.height) {
-        console.log("ERR getClosestLineCoordByMouse: Invalid y coordinates");
+        // console.log("ERR getClosestLineCoordByMouse: Invalid y coordinates");
         return [null, null, null, null];
     }
 
     // Do calculations in Local Space
     const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
-    console.log("getClosestLineCoordByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
-    console.log([idealWidth, idealHeight, offsetX, offsetY]);
+    // console.log("getClosestLineCoordByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
+    // console.log([idealWidth, idealHeight, offsetX, offsetY]);
     const [x, y] = [Math.max(0, mouseCoord.x - offsetX), Math.max(0, mouseCoord.y - offsetY)];
-    console.log("getClosestLineCoordByMouse: [x, y] -offset for local space");
-    console.log([x, y]);
+    // console.log("getClosestLineCoordByMouse: [x, y] -offset for local space");
+    // console.log([x, y]);
     let closestX1 = Math.min(
         idealWidth / (cols - 1) * (cols - 2), // 2nd last (last is not allowed: that will be closestX2)
         Math.floor(x / idealWidth * (cols - 1)) / (cols - 1) * idealWidth);
@@ -279,8 +325,8 @@ const getClosestLineCoordByMouse = ([rows, cols], dimensions, mouseCoord) => {
     let closestX2 = closestX1 + idealWidth / (cols - 1);
     let closestY2 = closestY1 + idealHeight / (rows - 1);
 
-    console.log("getClosestLineCoordByMouse: before global space: [closestX1,Y1,X2,y2");
-    console.log([closestX1, closestY1, closestX2, closestY2]);
+    // console.log("getClosestLineCoordByMouse: before global space: [closestX1,Y1,X2,y2");
+    // console.log([closestX1, closestY1, closestX2, closestY2]);
 
     // go back to Global Space
     closestX1 += offsetX;
@@ -288,8 +334,8 @@ const getClosestLineCoordByMouse = ([rows, cols], dimensions, mouseCoord) => {
     closestX2 += offsetX;
     closestY2 += offsetY;
 
-    console.log("getClosestLineCoordByMouse: after global space: [closestX1,Y1,X2,y2");
-    console.log([closestX1, closestY1, closestX2, closestY2]);
+    // console.log("getClosestLineCoordByMouse: after global space: [closestX1,Y1,X2,y2");
+    // console.log([closestX1, closestY1, closestX2, closestY2]);
     // Now we have 2 x and 2 y coordinates whose cartesian product will yield to the 4 points
     // Those 4 points EXACTLY represent the box in which the line is present
     // The task is now to see where and which line is closest within that box according to mouse coordinates
@@ -315,11 +361,11 @@ const getClosestLineCoordByMouse = ([rows, cols], dimensions, mouseCoord) => {
             const s = (p0[0] - p2[0]) * (e[1] - p2[1]) - (p0[1] - p2[1]) * (e[0] - p2[0]);
             const t = (p1[0] - p0[0]) * (e[1] - p0[1]) - (p1[1] - p0[1]) * (e[0] - p0[0]);
 
-            if ((s < 0) != (t < 0) && s != 0 && t != 0)
+            if ((s < 0) !== (t < 0) && s !== 0 && t !== 0)
                 return false;
 
             var d = (p2[0] - p1[0]) * (e[1] - p1[1]) - (p2[1] - p1[1]) * (e[0] - p1[0]);
-            return d == 0 || (d < 0) == (s + t <= 0);
+            return d === 0 || (d < 0) === (s + t <= 0);
         }
 
         // get center of rectangle
@@ -349,74 +395,174 @@ const getClosestLineCoordByMouse = ([rows, cols], dimensions, mouseCoord) => {
     const D = [closestX1, closestY2];
 
     const [lineX1, lineY1, lineX2, lineY2] = getLineByTriangleContainingPoint(E, A, B, C, D).map(dPR);
-    console.log("getClosestLineCoordByMouse: FINAL OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
-    console.log([lineX1, lineY1, lineX2, lineY2]);
+    // console.log("getClosestLineCoordByMouse: FINAL OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
+    // console.log([lineX1, lineY1, lineX2, lineY2]);
     return [lineX1, lineY1, lineX2, lineY2];
 }
 
 const getClosestLinePointsByMouse = ([rows, cols], dimensions, mouseCoord) => {
-    console.log("BEGIN getClosestLinePointsByMouse");
+    // console.log("BEGIN getClosestLinePointsByMouse");
     let [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse([rows, cols], dimensions, mouseCoord);
-    console.log("back to getClosestLinePointsByMouse");
+    // console.log("back to getClosestLinePointsByMouse");
     // convert line coordinates to point coordinates
     if (![lineX1, lineY1, lineX2, lineY2].includes(null)) {
-        console.log("getClosestLinePointsByMouse: successful entering of if");
+        // console.log("getClosestLinePointsByMouse: successful entering of if");
         // do calculations in local space
         const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
 
-        console.log("getClosestLinePointsByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
-        console.log([idealWidth, idealHeight, offsetX, offsetY]);
+        // console.log("getClosestLinePointsByMouse: [idealWidth, idealHeight, offsetX, offsetY]");
+        // console.log([idealWidth, idealHeight, offsetX, offsetY]);
 
         lineX1 = Math.max(0, dPR(lineX1 - offsetX));
         lineY1 = Math.max(0, dPR(lineY1 - offsetY));
         lineX2 = Math.max(0, dPR(lineX2 - offsetX));
         lineY2 = Math.max(0, dPR(lineY2 - offsetY));
-        console.log("getClosestLinePointsByMouse: offset to local space: [lineX1, lineY1, lineX2, lineY2]");
-        console.log([lineX1, lineY1, lineX2, lineY2]);
+        // console.log("getClosestLinePointsByMouse: offset to local space: [lineX1, lineY1, lineX2, lineY2]");
+        // console.log([lineX1, lineY1, lineX2, lineY2]);
 
         const x1 = Math.floor(lineX1 / idealWidth * (cols - 1));
         const y1 = Math.floor(lineY1 / idealHeight * (rows - 1));
         const x2 = Math.floor(lineX2 / idealWidth * (cols - 1));
         const y2 = Math.floor(lineY2 / idealHeight * (rows - 1));
-        console.log("getClosestLinePointsByMouse: FINAL OUPTUT: [x1, y1, x2, y2]");
-        console.log([x1, y1, x2, y2]);
+        // console.log("getClosestLinePointsByMouse: FINAL OUPTUT: [x1, y1, x2, y2]");
+        // console.log([x1, y1, x2, y2]);
         return [x1, y1, x2, y2];
     }
 
     // return null if invalid mouse coordinates (or outside all boxes)
-    console.log("FAILED getClosestLinePointsByMouse: output null");
+    // console.log("FAILED getClosestLinePointsByMouse: output null");
     return [null, null, null, null];
 
 }
 
 const getLineCoordBetweenPoints = ([x1, y1, x2, y2], [rows, cols], dimensions) => {
-    console.log("BEGIN getLineCoordBetweenPoints");
-    console.log("INPUT: [x1, y1, x2, y2]");
-    console.log([x1, y1, x2, y2]);
+    // console.log("BEGIN getLineCoordBetweenPoints");
+    // console.log("INPUT: [x1, y1, x2, y2]");
+    // console.log([x1, y1, x2, y2]);
     // ensure x \in [mod rows] and y \in [mod cols]
     if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) {
-        console.log("getLineCoordBetweenPoints: INVALID < 0");
+        // console.log("getLineCoordBetweenPoints: INVALID < 0");
         return [null, null, null, null];
     }
     if (x1 > cols - 1 || y1 > rows - 1 || x2 > cols - 1 || y2 > rows - 1) {
-        console.log("getLineCoordBetweenPoints: INVALID > limitsize");
+        // console.log("getLineCoordBetweenPoints: INVALID > limitsize");
         return [null, null, null, null];
     }
 
     // Coordinates must be calculated in local space than offset to global
     const [idealWidth, idealHeight, offsetX, offsetY] = getIdealDrawingArea(dimensions);
-    console.log("getLineCoordBetweenPoints: [idealWidth, idealHeight, offsetX, offsetY]");
-    console.log("[idealWidth, idealHeight, offsetX, offsetY]");
+    // console.log("getLineCoordBetweenPoints: [idealWidth, idealHeight, offsetX, offsetY]");
+    // console.log("[idealWidth, idealHeight, offsetX, offsetY]");
     let lineX1 = x1 / (cols - 1) * idealWidth + offsetX;
     let lineY1 = y1 / (rows - 1) * idealHeight + offsetY;
     let lineX2 = x2 / (cols - 1) * idealWidth + offsetX;
     let lineY2 = y2 / (rows - 1) * idealHeight + offsetY;
     [lineX1, lineY1, lineX2, lineY2] = [lineX1, lineY1, lineX2, lineY2].map(dPR);
-    console.log("getLineCoordBetweenPoints: FINAL STAGE");
-    console.log("INPUT:  [x1, y1, x2, y2]");
-    console.log([x1, y1, x2, y2]);
-    console.log("OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
-    console.log([lineX1, lineY1, lineX2, lineY2]);
+    // console.log("getLineCoordBetweenPoints: FINAL STAGE");
+    // console.log("INPUT:  [x1, y1, x2, y2]");
+    // console.log([x1, y1, x2, y2]);
+    // console.log("OUTPUT: [lineX1, lineY1, lineX2, lineY2]");
+    // console.log([lineX1, lineY1, lineX2, lineY2]);
     // return line coordnates, in Global Space
     return [lineX1, lineY1, lineX2, lineY2];
+}
+
+const findNewCompletedBoxes = ([rows, cols], [px1, py1, px2, py2], clickedLines) => {
+    // console.log("BEGIN findNewCompletedBox");
+    // console.log("findNewCompletedBox: input [px1, py1, px2, py2]");
+    // console.log([px1, py1, px2, py2]);
+    // console.log("findNewCompletedBox: input clickedLines");
+    // console.log(clickedLines);
+    // const [px1, py1, px2, py2] = clickedLineKey.split('-').map((strnum) => parseInt(strnum));
+    if (py1 === py2) { // if there is/are completed box(es) is/are either above AND/OR below to the clickedLine
+        // console.log("findNewCompletedBox: py1==py2");
+        /*   
+                            x1,y-1 _ _ _ _ _ _ _x2,y-1
+                            |     ABOVE BOX      |
+                            |                    |
+                            x1,y-----------------x2,y
+                            |     BELOW BOX      |
+                            |                    |
+                            x1,y+1 _ _ _ _ _ _ _x2,y+1
+        */
+        const py = py1;
+        const aboveBoxLinesPoints = [
+            [px1, py - 1, px2, py - 1],
+            [px2, py - 1, px2, py],
+            [px1, py, px2, py],
+            [px1, py - 1, px1, py],
+        ];
+        const belowBoxLinesPoints = [
+            [px1, py, px2, py],
+            [px2, py, px2, py + 1],
+            [px1, py + 1, px2, py + 1],
+            [px1, py, px1, py + 1],
+        ];
+        // console.log("findNewCompletedBox: aboveBoxLinesPoints");
+        // console.log(aboveBoxLinesPoints);
+        // console.log("findNewCompletedBox: belowBoxLinesPoints");
+        // console.log(belowBoxLinesPoints);
+        const isAboveBoxCompleted = aboveBoxLinesPoints.reduce((prevBool, points) => prevBool && (points.join('-') in clickedLines), true);
+        const isBelowBoxCompleted = belowBoxLinesPoints.reduce((prevBool, points) => prevBool && (points.join('-') in clickedLines), true);
+
+        // if any of the boxes is completed, return in format list([startPointX, startPointY]) to help create offsets when drawing later rectangles in renderCompletedBoxes
+        if (isAboveBoxCompleted && isBelowBoxCompleted) {
+            // console.log("findNewCompletedBox: return above and below");
+            return [[px1, py - 1], [px1, py]];
+        }
+        if (isAboveBoxCompleted) {
+            // console.log("findNewCompletedBox: return above");
+            return [[px1, py - 1]];
+        }
+        if (isBelowBoxCompleted) {
+            // console.log("findNewCompletedBox: return below");
+            return [[px1, py]];
+        }
+    }
+    else if (px1 === px2) { // if there is/are completed box(es) is/are is either left AND/OR right to the clickedLine
+        // console.log("findNewCompletedBox: px1 == px2");
+        /*   
+                            x-1,y1 _ _ _ _ _ _ _ x,y1 _ _ _ _ _ _ x+1,y1
+                            |       LEFT BOX      .  RIGHT BOX      |
+                            |                     .                 |
+                            x-1,y2 _ _ _ _ _ _ _ x,y2 _ _ _ _ _ _ x+1,y2
+        */
+        const px = px1;
+        const leftBoxLinesPoints = [
+            [px - 1, py1, px, py1],
+            [px, py1, px, py2],
+            [px - 1, py2, px, py2],
+            [px - 1, py1, px - 1, py2],
+        ];
+        const rightBoxLinesPoints = [
+            [px, py1, px + 1, py1],
+            [px + 1, py1, px + 1, py2],
+            [px, py2, px + 1, py2],
+            [px, py1, px, py2],
+        ];
+        // console.log("findNewCompletedBox: leftBoxLinesPoints");
+        // console.log(leftBoxLinesPoints);
+        // console.log("findNewCompletedBox: rightBoxLinesPoints");
+        // console.log(rightBoxLinesPoints);
+        const isLeftBoxCompleted = leftBoxLinesPoints.reduce((prevBool, points) => prevBool && (points.join('-') in clickedLines), true);
+        const isRightBoxCompleted = rightBoxLinesPoints.reduce((prevBool, points) => prevBool && (points.join('-') in clickedLines), true);
+
+        if (isLeftBoxCompleted && isRightBoxCompleted) {
+            // console.log("findNewCompletedBox: return left and right");
+            return [[px - 1, py1], [px, py1]];
+        }
+        if (isLeftBoxCompleted) {
+            // console.log("findNewCompletedBox: return left");
+            return [[px - 1, py1]];
+        }
+        if (isRightBoxCompleted) {
+            // console.log("findNewCompletedBox: return left");
+            return [[px, py1]];
+        }
+    }
+    else {
+        console.log("ERROR: findNewCompletedBox: both x/y points are different! Not a horizontal or vertical line!");
+    }
+    console.log("findNewCompletedBox: null");
+    return null;
 }
