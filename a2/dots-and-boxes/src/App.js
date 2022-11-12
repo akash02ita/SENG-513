@@ -51,14 +51,14 @@ function App() {
     console.log("again");
     return (
       <div className="App">
-        <Game boardId="uniqueBoard1" rows={gameArgs.rows} cols={gameArgs.cols} playerCount={gameArgs.playerCount} colors={colors} handleEndGame={handleEndGame} />
+        <Game boardId="uniqueBoard1" rows={gameArgs.rows} cols={gameArgs.cols} playerCount={gameArgs.playerCount} colors={colors} handleEndGame={handleEndGame} handleGoToLanding={handleGoToLanding} />
       </div>
     );
   }
   if (state === 2) {
     return (
       <div className="App">
-        <Stats historyGame={statArgs.history} handleRestartGame={handleRestartGame} handleGoToLanding={handleGoToLanding} colors={colors}/>
+        <Stats historyGame={statArgs.history} handleRestartGame={handleRestartGame} handleGoToLanding={handleGoToLanding} colors={colors} />
       </div>
     );
   }

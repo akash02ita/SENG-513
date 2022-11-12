@@ -114,6 +114,11 @@ rect {
   transition: 500ms;
 }
 
+.button-flex {
+  display: flex;
+  justify-content: space-between;
+}
+
 /* Stats */
 .Stats {
   background-color: rgba(250, 235, 215, 0.904);

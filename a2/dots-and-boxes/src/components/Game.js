@@ -164,6 +164,10 @@ function Game(props) {
         setHistory(history.slice(0, history.length - 1));
     }
 
+    const handleRestartGame = () => {
+        setHistory(history.slice(0, 1));
+    }
+
     // HISTORY to keep track of all moves. Also allows to go back in history or restart game
     const firstTurn = props.firstTurn ? props.firstTurn : 0;
     const [history, setHistory] = useState([{
@@ -296,7 +300,11 @@ function Game(props) {
                     {renderCircles()}
                 </svg>
             </div>
-            <button onClick={handleUndoStep}>Undo step</button>
+            <div className="button-flex">
+                <button onClick={() => props.handleGoToLanding()}>HOME</button>
+                <button onClick={handleUndoStep}>Undo step</button>
+                <button onClick={handleRestartGame}>RESTART</button>
+            </div>
             {renderPlayersSCore()}
         </div>
     );

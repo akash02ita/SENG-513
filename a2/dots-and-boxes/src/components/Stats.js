@@ -18,7 +18,7 @@ function Stats(props) {
             </div>);
         })
         return (<div className="player-winner-list">
-            Ladies and Gentlement, we would like to show you that the {winner_s} {is_are}:
+            Ladies and Gentlemen, we would like to show you that the {winner_s} {is_are}:
             {divWinners}
             <div className="max-score">
                 Highest Score achieved by the {winner_s}: {maxScore}
