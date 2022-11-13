@@ -7,7 +7,7 @@ body {
 
 /* Landing */
 .Landing {
-  background-color: rgba(250, 235, 215, 0.421);
+  /* background-color: rgba(250, 235, 215, 0.421); */
   margin: 10vh auto;
   display: block;
   height: 90vh;
@@ -68,7 +68,7 @@ body {
 
 /* Game */
 .Game {
-  background-color: rgba(250, 235, 215, 0.904);
+  /* background-color: rgba(250, 235, 215, 0.904); */
   font-family: 'Courier New', Courier, monospace;
   font-size: 3vmin;
   font-weight: bold;
@@ -114,9 +114,23 @@ rect {
   transition: 500ms;
 }
 
+.button-flex {
+  display: flex;
+  justify-content: space-between;
+}
+
+.current-turn {
+  color: yellow;
+}
+
+.players-score-list {
+  background-color: white;
+  color: black;
+}
+
 /* Stats */
 .Stats {
-  background-color: rgba(250, 235, 215, 0.904);
+  background-color: white;
   margin: 15vh auto;
   height: 60vh;
   font-family: 'Courier New', Courier, monospace;

@@ -17,10 +17,10 @@ function Landing(props) {
 
     const handleStartGame = () => {
         // ensure all fields are valid
-        console.log("handleStartGame: see data input");
-        console.log("rows: " + rows);
-        console.log("cols: " + cols);
-        console.log("playerCount: " + playerCount);
+        // console.log("handleStartGame: see data input");
+        // console.log("rows: " + rows);
+        // console.log("cols: " + cols);
+        // console.log("playerCount: " + playerCount);
         // if not do not start game and put alert message
         const checkRows = rows ? rows : 4;
         const checkCols = cols ? cols : 4;
