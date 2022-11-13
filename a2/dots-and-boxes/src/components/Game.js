@@ -334,8 +334,8 @@ const [SCALE_TRANSLATION, SCALE_FACTOR] = [40, 0.80];
 const getIdealDrawingArea = (dimensions) => {
     const currWidth = dimensions.width;
     const currHeight = dimensions.height;
-    const idealHeight = Math.max(currHeight * SCALE_FACTOR, currHeight - SCALE_TRANSLATION);
-    const idealWidth = Math.max(currWidth * SCALE_FACTOR, currWidth - SCALE_TRANSLATION);
+    const idealHeight = dPR(Math.max(currHeight * SCALE_FACTOR, currHeight - SCALE_TRANSLATION));
+    const idealWidth = dPR(Math.max(currWidth * SCALE_FACTOR, currWidth - SCALE_TRANSLATION));
     // Offsets will be rounded to some precision level
     // Otherwise they cause floating precission accuracies problem in javascript, which will later cause to get improper (Math.floor will round to a value lower by 1) calculations in converting coordinates to points and vice versa
     const offsetX = dPR((currWidth - idealWidth) / 2);
@@ -450,6 +450,7 @@ const getClosestLineCoordByMouse = ([rows, cols], dimensions, mouseCoord) => {
 const getClosestLinePointsByMouse = ([rows, cols], dimensions, mouseCoord) => {
     // console.log("BEGIN getClosestLinePointsByMouse");
     let [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse([rows, cols], dimensions, mouseCoord);
+    // console.log([lineX1, lineY1, lineX2, lineY2]);
     // console.log("back to getClosestLinePointsByMouse");
     // convert line coordinates to point coordinates
     if (![lineX1, lineY1, lineX2, lineY2].includes(null)) {
@@ -467,10 +468,11 @@ const getClosestLinePointsByMouse = ([rows, cols], dimensions, mouseCoord) => {
         // console.log("getClosestLinePointsByMouse: offset to local space: [lineX1, lineY1, lineX2, lineY2]");
         // console.log([lineX1, lineY1, lineX2, lineY2]);
 
-        const x1 = Math.floor(lineX1 / idealWidth * (cols - 1));
-        const y1 = Math.floor(lineY1 / idealHeight * (rows - 1));
-        const x2 = Math.floor(lineX2 / idealWidth * (cols - 1));
-        const y2 = Math.floor(lineY2 / idealHeight * (rows - 1));
+        // BUG FIX: here the same issue arises when rows=cols=6. dPR fixes the bug.
+        const x1 = Math.floor(dPR(lineX1 / idealWidth * (cols - 1)));
+        const y1 = Math.floor(dPR(lineY1 / idealHeight * (rows - 1)));
+        const x2 = Math.floor(dPR(lineX2 / idealWidth * (cols - 1)));
+        const y2 = Math.floor(dPR(lineY2 / idealHeight * (rows - 1)));
         // console.log("getClosestLinePointsByMouse: FINAL OUPTUT: [x1, y1, x2, y2]");
         // console.log([x1, y1, x2, y2]);
         return [x1, y1, x2, y2];

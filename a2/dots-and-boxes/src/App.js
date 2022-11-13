@@ -25,8 +25,8 @@ function App() {
   }
 
   const handleEndGame = (history) => {
-    console.log("App received history");
-    console.log(history);
+    // console.log("App received history");
+    // console.log(history);
     // set the args without loosing the previous ones (this will allow user to restart game with same args)
     setStatArgs({ history: history });
     setState(2);
@@ -48,7 +48,7 @@ function App() {
     );
   }
   if (state === 1) {
-    console.log("again");
+    // console.log("again");
     return (
       <div className="App">
         <Game boardId="uniqueBoard1" rows={gameArgs.rows} cols={gameArgs.cols} playerCount={gameArgs.playerCount} colors={colors} handleEndGame={handleEndGame} handleGoToLanding={handleGoToLanding} />
