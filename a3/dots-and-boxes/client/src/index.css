@@ -1,0 +1,164 @@
+body {
+  /* source: https://i.pinimg.com/originals/a0/33/2a/a0332a69c5feab929c6a9e208a9de9f0.gif */
+  background-image: url("../src/images/background-gif.gif");
+  background-size: cover;
+  background-position-y: -10vw;
+}
+
+/* Landing */
+.Landing {
+  /* background-color: rgba(250, 235, 215, 0.421); */
+  margin: 10vh auto;
+  display: block;
+  height: 90vh;
+}
+
+.input-field {
+  margin: 2vh auto;
+  display: block;
+  width: 30vw;
+  height: 5vh;
+  border-radius: 3em;
+  text-align: center;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 3vmin;
+}
+
+.input-field:hover {
+  width: 40vw;
+  transition: 500ms;
+}
+
+.input-button {
+  display: block;
+  background-color: rgba(165, 42, 42, 0.793);
+  width: 40vw;
+  height: 20vh;
+  margin-left: 30vw;
+  /* text-align: center; */
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 5vmin;
+  border-radius: 3em;
+}
+
+
+.input-button:hover {
+  background-color: rgb(165, 42, 42);
+  font-size: 8vmin;
+  transition: 500ms;
+}
+
+.input-instructions,
+.game-instructions {
+  background-color: rgba(38, 176, 176, 0.595);
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1.5em;
+  text-align: center;
+  width: 50%;
+  margin: auto auto;
+  border-radius: 1em;
+}
+.input-instructions:hover,
+.game-instructions:hover {
+  background-color: rgb(38, 176, 176);
+  font-size: 1.8em;
+  transition: 800ms;
+}
+
+
+/* Game */
+.Game {
+  /* background-color: rgba(250, 235, 215, 0.904); */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 3vmin;
+  font-weight: bold;
+  text-align: center;
+}
+
+.svgDiv {
+  width: 50vmin;
+  height: 50vmin;
+  margin: auto auto;
+}
+
+svg {
+  margin: auto auto;
+  border-radius: 1.5em;
+  height: 100%;
+  width: 100%;
+  background-color: white;
+}
+
+line {
+  stroke-width: 0.2em;
+}
+
+rect {
+  fill-opacity: 0.5;
+}
+
+.Game button {
+  display: block;
+  margin: 2vh auto;
+  background-color: rgba(255, 228, 196, 0.76);
+  width: 15vw;
+  height: 6vw;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 2.5vmin;
+  border-radius: 1em;
+}
+
+.Game button:hover {
+  background-color: rgb(172, 110, 35);
+  font-size: 3vmin;
+  transition: 500ms;
+}
+
+.button-flex {
+  display: flex;
+  justify-content: space-between;
+}
+
+.current-turn {
+  color: yellow;
+}
+
+.players-score-list {
+  background-color: white;
+  color: black;
+}
+
+/* Stats */
+.Stats {
+  background-color: white;
+  margin: 15vh auto;
+  height: 60vh;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 3vmin;
+  font-weight: bold;
+  text-align: center;
+  display: block;
+}
+
+.Stats button {
+  background-color: rgba(42, 165, 124, 0.793);
+  width: 25vmin;
+  height: 15vmin;
+  margin: 2vh 4vh;
+  /* text-align: center; */
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 3vmin;
+  border-radius: 2em;
+}
+
+.Stats button:hover {
+  background-color: rgb(83, 165, 42);
+  font-size: 4vmin;
+  transition: 500ms;
+}
+
+/* other */
+
+.player-winner {
+  color: crimson;
+}
