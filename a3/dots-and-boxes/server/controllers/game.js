@@ -1,3 +1,4 @@
+const { handleMove } = require("./gameUtility");
 const { generateToken, generatePlayersZeroScore } = require("./playerUtility");
 
 const games = {};
@@ -75,7 +76,7 @@ exports.createGame = (req, res) => {
             "isLobbyFull": false,
             "rows": rows,
             "cols": cols,
-            "numPlayers": parseInt(req.body["numPlayers"]),
+            "numPlayers": numPlayers,
             // "users": [req.body["username"]],
             "users": [],
             "history": [{
@@ -152,7 +153,7 @@ exports.joinGame_get = (req, res) => {
     const isMyTurn = indexToken === history[history.length - 1]["turn"];
 
     return res.status(200).json({
-        "status": "succcess",
+        "status": "success",
         "shared": games[key]["shared"],
         "isMyTurn": isMyTurn
     });
@@ -229,14 +230,28 @@ exports.joinGame_post = (req, res) => {
 
 }
 
+/**
+ * Poll game status and know whether it is user's turn or not.
+ * @param {*} req 
+ * @param {*} res 
+ * @returns Game state and if it's user's turn or not.
+ */
 exports.pollGame = (req, res) => {
+    console.log("GET pollGame");
     // the process is to nothing other than return the game status
 
     // joinGame_get can be REUSED here for this specific purpose at the moment
     return this.joinGame_get(req, res);
 }
 
+/**
+ * Allows user, who has his turn, to send the move he wishes to apply
+ * @param {*} req 
+ * @param {*} res 
+ * @returns a status whether the move was successfully applied or not
+ */
 exports.applyMove = (req, res) => {
+    console.log("POST applyMove");
     // note that users[i] corresponds to playersToken[i]: this is how verification will be done
     // turn = i
     // thus user applying the move must have the corresponding cookie token to playersToken[turn]
@@ -245,6 +260,13 @@ exports.applyMove = (req, res) => {
     // the next validation is to obviously ensure the user move to apply is valid on the current game state
 
     key = req.params["gamePasscode"];
+
+    if (!(key in games)) {
+        return res.status(400).json({
+            "status": "failed",
+            "description": `There is no game room with passcode ${key}`
+        })
+    }
 
     if (!req.body["points"]) {
         return res.status(400).json({
@@ -259,15 +281,57 @@ exports.applyMove = (req, res) => {
         });
     }
 
-    // ensure order is proper: CONVETION: x1 <= x2
-    // this is to avoid duplicate moves, just to be safe
-    const [x1, y1, x2, y2] = req.body["points"];
-
-    if (x1 <= x2) {
-        // handleMove
+    // verify lobby is full: only an ongoing game can have moves being applied
+    const isLobbyFull = games[key]["shared"]["isLobbyFull"];
+    if (!isLobbyFull) {
+        return res.status(200).json({
+            "status": "failed",
+            "description": "lobby not full yet"
+        });
     }
-    else {
 
+    // verify token match
+    if (!req.cookies[key]) {
+        return res.status(400).json({
+            "status": "failed",
+            "description": "Please enable cookies. Cookies are requires for player identification"
+        })
+    }
+
+    if (!games[key]["private"]["playersToken"].includes(req.cookies[key])) {
+        return res.status(400).json({
+            "status": "failed",
+            "description": "Invalid token. Only registered users in the game room are allowed."
+        })
+    }
+
+    const token = req.cookies[key];
+    const indexToken = games[key]["private"]["playersToken"].indexOf(token);
+    const history = games[key]["shared"]["history"];
+    const isPlayerTurn = indexToken === history[history.length - 1]["turn"];
+    if (!isPlayerTurn) {
+        return res.status(200).json({
+            "status": "failed",
+            "description": "It's not your turn yet."
+        })
+    }
+
+    const [x1, y1, x2, y2] = req.body["points"];
+    let return_code = "failed";
+    const cGS = games[key]["shared"]; // (c)urrent (G)ame (S)hared
+    return_code = handleMove(cGS, [x1, y1, x2, y2]);
+
+    if (return_code === 'success') { // inform user if move success
+        return res.status(200).json({
+            "status": "success",
+            "description": "move applied successfully"
+        });
+    }
+    else { // inform user fail move
+        return res.status(200).json({
+            "status": "failed",
+            "description": return_code
+        });
     }
 
 }
