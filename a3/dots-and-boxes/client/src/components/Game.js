@@ -346,7 +346,9 @@ function Game(props) {
         return (
             <div className="Game">
                 <div className="current-turn">
-                    Waiting for players
+                    Waiting for players to join at {gamePasscode}
+                    <br />
+                    <br />
                 </div>
                 <div id={"defaultBoardId1"} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
                     <svg>
@@ -363,6 +365,8 @@ function Game(props) {
             <div className="current-turn">
                 {/* Current turn: player{history[history.length - 1].turn} */}
                 Current turn: {gameData["users"][history[history.length - 1].turn]}
+                <br />
+                <br />
             </div>
             <div id={"defaultBoardId1"} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
                 <svg>
