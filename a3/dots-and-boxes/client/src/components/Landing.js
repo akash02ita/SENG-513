@@ -12,6 +12,7 @@ import rightArrow from "../assets/icons8-double-right-96.png"
 */
 
 function Landing(props) {
+    const [username, setUsername] = useState(null);
     const [rows, setRows] = useState(null);
     const [cols, setColumns] = useState(null);
     const [playerCount, setPlayerCount] = useState(null);
@@ -19,10 +20,56 @@ function Landing(props) {
     const [gamePasscode, setGamePasscode] = useState(null);
 
     const handleCreateGame = () => {
+        if (!username) {
+            alert("Invalid username");
+            return;
+        }
+        // ensure all fields are valid
+        // console.log("handleStartGame: see data input");
+        // console.log("rows: " + rows);
+        // console.log("cols: " + cols);
+        // console.log("playerCount: " + playerCount);
+        // if not do not start game and put alert message
+        const checkRows = rows ? rows : 4;
+        const checkCols = cols ? cols : 4;
+        const checkPlayerCount = playerCount ? playerCount : 3;
+
+        if (checkRows < 2 || checkCols < 2) {
+            alert("Invalid rows and/or columns value");
+            return;
+        }
+        if (checkRows > 10 || checkCols > 10) {
+            alert("At most 10 rows and columns are allowed.");
+            return;
+        }
+        // max player count is either what passed otherwise number of total lines
+        const maxPlayerCount = props.maxPlayerCount ? props.maxPlayerCount : (checkRows) * (checkCols - 1) + (checkRows - 1) * (checkCols);
+        if (checkPlayerCount < 2) {
+            alert("At least 2 players");
+            return;
+        }
+        if (checkPlayerCount > maxPlayerCount) {
+            alert("At most " + maxPlayerCount + " players are allowed");
+            return;
+        }
+
+        // by this point everything is valid so let the parent component handle the start of the game
+        props.handleCreateGame(username, rows, cols, playerCount);
 
     }
     const handleJoinGame = () => {
+        if (!username) {
+            alert("Invalid username");
+            return;
+        }
+        console.log("Landing: handleJoinGame: gamePasccode is " + gamePasscode);
+        // passcode should be numeric digits only
+        if (!gamePasscode || gamePasscode.match(/^[0-9]+$/) === null) {
+            alert("Invalid gamePasscode. Only digits allowed.");
+            return;
+        }
 
+        props.handleJoinGame(username, gamePasscode);
     }
 
     const [cardNum, setCardNum] = useState(0);
@@ -87,10 +134,11 @@ function Landing(props) {
         // idea2: maybe use arrow keys to let user increment decrement rows or cols count with taps, beside just typing
         // if more time allows, one of the ideas above can be implemented
         <div className="Landing">
+            <input className="input-field username" name="username" placeholder="Enter username ..." onChange={(event) => setUsername(event.target.value)} />
             <div className="create-game">
-                <input className="input-field" name="numRows" placeholder="Enter # of rows ..." onChange={(event) => setRows(event.target.value)} />
-                <input className="input-field" name="numCols" placeholder="Enter # of columns ..." onChange={(event) => setColumns(event.target.value)} />
-                <input className="input-field" name="numPlayers" placeholder="Enter # of players .." onChange={(event) => setPlayerCount(event.target.value)} />
+                <input className="input-field" name="numRows" placeholder="Enter # of rows: 4" onChange={(event) => setRows(event.target.value)} />
+                <input className="input-field" name="numCols" placeholder="Enter # of columns: 4" onChange={(event) => setColumns(event.target.value)} />
+                <input className="input-field" name="numPlayers" placeholder="Enter # of players: 3" onChange={(event) => setPlayerCount(event.target.value)} />
                 <button className="input-button" onClick={handleCreateGame}>Create game</button>
             </div>
 

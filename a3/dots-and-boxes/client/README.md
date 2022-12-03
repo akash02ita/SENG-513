@@ -1,3 +1,6 @@
+# Note:
+
+In `package.json` file, **proxy** field was added to bottom to pass in relative paths only when using API calls to the backend server.
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

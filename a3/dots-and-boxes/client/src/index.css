@@ -1,3 +1,8 @@
+/* global styles */
+.username {
+  background-color: aquamarine;
+}
+
 /* desktop styling */
 @media only screen and (min-width: 800px) {
   body {
@@ -241,7 +246,7 @@
     display: block;
     height: 90vh;
   }
-
+  
   .input-field {
     margin: 2vh auto;
     display: block;

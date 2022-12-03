@@ -1,7 +1,9 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 function Game(props) {
+    const { gamePasscode } = useParams();
     // get size of board (dots*dots) otherwise by default 4x4 dots
     const rows = props.rows && props.cols && props.rows > 1 && props.cols > 1 && props.rows <= 10 && props.cols <= 10 ? props.rows : 4; // number of dots horizontally
     const cols = props.rows && props.cols && props.rows > 1 && props.cols > 1 && props.rows <= 10 && props.cols <= 10 ? props.cols : 4; // number of dots vertically
