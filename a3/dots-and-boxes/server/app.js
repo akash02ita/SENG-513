@@ -2,7 +2,16 @@ const gameRouter = require('./routes/game.js');
 
 const express = require('express');
 const app = express();
-const port =  process.env.port || 4000;
+const port = process.env.port || 4000;
+
+// fix CORS issue
+const cors = require('cors');
+// using cors with also these parameters to allow usage of cookies
+app.use(cors({
+    origin: true,
+    credentials: true,
+    preflightContinue: true
+}));
 
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
