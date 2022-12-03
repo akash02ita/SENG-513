@@ -128,7 +128,7 @@ function App() {
           }
 
           const gamePasscode = json_response["shared"]["gamePasscode"];
-          navigate("game/" + gamePasscode);
+          navigate("joingame/" + gamePasscode);
         }
       );
   }
@@ -139,10 +139,11 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing handleCreateGame={handleCreateGame} handleJoinGame={handleJoinGame} maxPlayerCount={colors.length} />} />
-      <Route path="game/:gamePasscode" element={<Game />} />
+      {/* avoid confliting name with server: so joingame instead of just game */}
+      <Route path="joingame/:gamePasscode" element={<Game />} />
       <Route path="stats/:gamePasscode" element={<Stats />} />
       {/* redirect to home page for any invalid link */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
     </Routes>
   );
 

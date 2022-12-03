@@ -1,19 +1,61 @@
 
-import { useLayoutEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function Game(props) {
-    const { gamePasscode } = useParams();
-    // get size of board (dots*dots) otherwise by default 4x4 dots
-    const rows = props.rows && props.cols && props.rows > 1 && props.cols > 1 && props.rows <= 10 && props.cols <= 10 ? props.rows : 4; // number of dots horizontally
-    const cols = props.rows && props.cols && props.rows > 1 && props.cols > 1 && props.rows <= 10 && props.cols <= 10 ? props.cols : 4; // number of dots vertically
-    const playerColors = props.colors ? props.colors : ["red", "green", "blue", "yellow", "orange", "pink", "purple"];
-    const totalLines = (rows) * (cols - 1) + (cols) * (rows - 1);
-    const totalBoxes = (rows - 1) * (cols - 1);
-    const maxPlayerCount = Math.min(totalLines, playerColors.length);
+    const navigate = useNavigate();
 
-    // get playerCount otherwise by default 3
-    const playerCount = props.playerCount && props.playerCount > 1 ? Math.min(maxPlayerCount, props.playerCount) : 3;
+    const { gamePasscode } = useParams();
+    const [gameData, setGameData] = useState(null);
+    const [rows, setrows] = useState(null);
+    const [cols, setcols] = useState(null);
+    const [playerCount, setplayerCount] = useState(null);
+    const [totalLines, settotalLines] = useState(null);
+    const [totalBoxes, settotalBoxes] = useState(null);
+
+    const playerColors = props.colors ? props.colors : ["red", "green", "blue", "yellow", "orange", "pink", "purple"];
+
+
+    useEffect(() => {
+        let json_response = null;
+        fetch('/game/' + gamePasscode)
+            .then(response => response.json())
+            .then(data => { console.log("App:handleJoinGame: data is ", data); json_response = data; })
+            .then(
+                () => {
+                    if (!json_response) {
+                        alert("No response received");
+                        return;
+                    }
+                    const status = json_response["status"];
+                    if (status !== 'success') {
+                        alert(json_response["description"]);
+                        return;
+                    }
+
+                    setGameData(json_response["shared"]);
+
+                    // get size of board (dots*dots) otherwise by default 4x4 dots
+                    setrows(json_response["shared"]["rows"]); // number of dots horizontally
+                    setcols(json_response["shared"]["cols"]); // number of dots vertically
+
+                    settotalLines((rows) * (cols - 1) + (cols) * (rows - 1));
+                    settotalBoxes((rows - 1) * (cols - 1));
+
+                    // get playerCount otherwise by default 3
+                    setplayerCount(json_response["shared"]["numPlayers"]);
+                }
+            );
+
+        // keep polling till componenet is not unmounted
+        const idinterval = setInterval(handlePoll, 500);
+        // clearinterval will run once component unmounts
+        return () => clearInterval(idinterval);
+
+    }, []);
+
+
+
 
     /*
         The following 2 sources helped me figure how to retrieve dimensions without 'infinite' loop issues.
@@ -65,22 +107,57 @@ function Game(props) {
                         - clientX/Y are relative to viewport but offsetLeft/Top are relative to page and not viewport!
             x: event.clientX - event.target.offsetLeft,
             y: event.clientY - event.target.offsetTop, */
-            x: event.pageX - document.getElementById(props.boardId).offsetLeft,
-            y: event.pageY - document.getElementById(props.boardId).offsetTop,
+            x: event.pageX - document.getElementById("defaultBoardId1").offsetLeft,
+            y: event.pageY - document.getElementById("defaultBoardId1").offsetTop,
         });
         const [lineX1, lineY1, lineX2, lineY2] = getClosestLineCoordByMouse([rows, cols], dimensions, mouseCoord);
         setDashedLineCoord({ x1: lineX1, y1: lineY1, x2: lineX2, y2: lineY2 });
-        // console.log("MouseMove detected for boardId " + props.boardId);
+        // console.log("MouseMove detected for boardId " + "defaultBoardId1");
         // console.log(mouseCoord);
         // console.log(event);
     }
 
+
+    const handlePoll = () => {
+        let json_response = null;
+        fetch('/pollGame/' + gamePasscode)
+            .then(response => response.json())
+            .then(data => { console.log("App:handlepoll: data is ", data); json_response = data; })
+            // .then(data => json_response = data)
+            .then(
+                () => {
+                    if (!json_response) {
+                        alert("No response received");
+                        return;
+                    }
+                    const status = json_response["status"];
+                    if (status !== 'success') {
+                        alert(json_response["description"]);
+                        return;
+                    }
+                    // check win status
+                    const newHistory = json_response["shared"]["history"];
+                    const newtotalBoxes = (json_response["shared"]["rows"] - 1) * (json_response["shared"]["cols"] - 1);
+                    const gameCompletedFlag = Object.keys(newHistory[newHistory.length - 1]["completedBoxes"]).length === newtotalBoxes;
+                    // console.log("handlepoll debug a b", Object.keys(newHistory[newHistory.length - 1]["completedBoxes"]).length, newtotalBoxes);
+                    if (gameCompletedFlag) {
+                        console.log("handlepoll: Game is completed");
+
+                        // .. is used to go back to parent route
+                        navigate("../stats/" + gamePasscode);
+                    }
+
+                    setGameData(json_response["shared"]);
+                    setHistory(json_response["shared"]["history"]);
+                }
+            )
+    }
     const handleMouseClick = (event) => {
         setMouseCoord({
-            x: event.pageX - document.getElementById(props.boardId).offsetLeft,
-            y: event.pageY - document.getElementById(props.boardId).offsetTop,
+            x: event.pageX - document.getElementById("defaultBoardId1").offsetLeft,
+            y: event.pageY - document.getElementById("defaultBoardId1").offsetTop,
         });
-        // console.log("MouseClick detected for boardId " + props.boardId);
+        // console.log("MouseClick detected for boardId " + "defaultBoardId1");
         // console.log(mouseCoord);
         // console.log(event);
 
@@ -107,67 +184,42 @@ function Game(props) {
             return;
         }
 
-        newClickedLines[key] = currentStatus.turn;
-        const newPlayesScore = { ...currentStatus.playersScore };
-        let newCompletedBoxes = { ...currentStatus.completedBoxes };
-        const foundCompletedBoxes = findNewCompletedBoxes([rows, cols], [x1, y1, x2, y2], newClickedLines);
-        let newTurn;
-        if (foundCompletedBoxes) {
-            // console.log(foundCompletedBoxes);
-            // console.log(newClickedLines);
-            // score increases only if at last 1 box is completed
-            newPlayesScore['player' + currentStatus.turn] += foundCompletedBoxes.length;
-            foundCompletedBoxes.forEach((startPointRect) => {
-                const keystartPointRect = startPointRect.join('-');
-                if (keystartPointRect in newCompletedBoxes) {
-                    console.log("ERROR: handleMouseClick: keystartPointRect already present in newCompletedBoxes");
-                    // console.log(keystartPointRect);
-                    // console.log(newCompletedBoxes);
+        // apply the move
+        let json_response = null;
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "points": [x1, y1, x2, y2],
+            })
+        };
+        fetch('/applyMove/' + gamePasscode, requestOptions)
+            .then(response => response.json())
+            .then(data => { console.log("Game:handleMouseClick: data is ", data); json_response = data; })
+            .then(
+                () => {
+                    if (!json_response) {
+                        alert("No response received");
+                        return;
+                    }
+                    const status = json_response["status"];
+                    if (status !== 'success') {
+                        alert(json_response["description"]);
+                        return;
+                    }
                 }
-                newCompletedBoxes[keystartPointRect] = currentStatus.turn;
-            });
-            // player turn remains same: same player must click a line again
-            newTurn = currentStatus.turn;
-        }
-        else {
-            // player turn changes only when a box is not completed
-            newTurn = (currentStatus.turn + 1) % playerCount;
-        }
+            );
 
 
+        const newCompletedBoxes = currentStatus.completedBoxes;
         const gameCompletedFlag = Object.keys(newCompletedBoxes).length === totalBoxes;
-
-        if (gameCompletedFlag) {
+        console.log("handleMouseClick: a,b", Object.keys(newCompletedBoxes).length, totalBoxes);
+        if (gameCompletedFlag && false) {
             console.log("handleMouseClick: Game is completed");
-            // NOTE: win or tie can happen (sort playerscore)
-            // TODO: call parent function and pass history to display statistics (App component will do that probably)
-            // stats.js WILL handle how to display results and stats
-            props.handleEndGame(history.concat({
-                clickedLines: newClickedLines,
-                completedBoxes: newCompletedBoxes,
-                playersScore: newPlayesScore,
-                turn: newTurn,
-            }));
-        } else {
-            setHistory(history.concat({
-                clickedLines: newClickedLines,
-                completedBoxes: newCompletedBoxes,
-                playersScore: newPlayesScore,
-                turn: newTurn,
-            }))
+            // .. is used to go back to parent route
+            navigate("../stats/" + gamePasscode)
         }
 
-    }
-
-    const handleUndoStep = () => {
-        if (history.length === 1) {
-            return;
-        }
-        setHistory(history.slice(0, history.length - 1));
-    }
-
-    const handleRestartGame = () => {
-        setHistory(history.slice(0, 1));
     }
 
     // HISTORY to keep track of all moves. Also allows to go back in history or restart game
@@ -214,7 +266,7 @@ function Game(props) {
         return svgCircles;
     }
 
-    const renderLines = (clickedLines) => {
+    const renderLines = () => {
         let lines = [];
         const linesPoints = history[history.length - 1].clickedLines;
         Object.entries(linesPoints).forEach(([key, turnValue]) => {
@@ -273,10 +325,13 @@ function Game(props) {
         const currentStatus = history[history.length - 1];
         const playersScore = currentStatus.playersScore;
         const divPlayersScore = Object.entries(playersScore).map(([playerName, playersScore]) => {
-            const playerClr = playerColors[parseInt(playerName.split('player')[1])];
+            const userIndex = parseInt(playerName.split('player')[1]);
+            const username = gameData["users"][userIndex];
+            const playerClr = playerColors[userIndex];
             return (
+                // playername is always unique
                 <div key={playerName} className="player-score" style={{ color: playerClr }}>
-                    {playerName} : {playersScore}
+                    {username} : {playersScore}
                 </div>
             );
         });
@@ -287,12 +342,29 @@ function Game(props) {
     }
 
 
+    if (!gameData || !gameData["isLobbyFull"]) {
+        return (
+            <div className="Game">
+                <div className="current-turn">
+                    Waiting for players
+                </div>
+                <div id={"defaultBoardId1"} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
+                    <svg>
+                        {/* rendering order matters (circles/dots should be in front) */}
+                        {renderLines()}
+                        {renderCircles()}
+                    </svg>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="Game">
             <div className="current-turn">
-                Current turn: player{history[history.length - 1].turn}
+                {/* Current turn: player{history[history.length - 1].turn} */}
+                Current turn: {gameData["users"][history[history.length - 1].turn]}
             </div>
-            <div id={props.boardId} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
+            <div id={"defaultBoardId1"} className="svgDiv" ref={divRef} onMouseMove={handleMouseMove} onClick={handleMouseClick}>
                 <svg>
                     {/* rendering order matters (circles/dots should be in front) */}
                     {/* renderCompletedBoxes RECTANGLES WITH SEMI-TRANSPARENT COLOR: do transparancy in sCSS */}
@@ -302,11 +374,12 @@ function Game(props) {
                     {renderCircles()}
                 </svg>
             </div>
-            <div className="button-flex">
+            {/* <div className="button-flex">
                 <button onClick={() => props.handleGoToLanding()}>HOME</button>
                 <button onClick={handleUndoStep}>Undo step</button>
                 <button onClick={handleRestartGame}>RESTART</button>
-            </div>
+            </div> */}
+            <br />
             {renderPlayersSCore()}
         </div>
     );

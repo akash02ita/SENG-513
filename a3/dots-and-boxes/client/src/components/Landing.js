@@ -13,9 +13,9 @@ import rightArrow from "../assets/icons8-double-right-96.png"
 
 function Landing(props) {
     const [username, setUsername] = useState(null);
-    const [rows, setRows] = useState(null);
-    const [cols, setColumns] = useState(null);
-    const [playerCount, setPlayerCount] = useState(null);
+    const [rows, setRows] = useState(4);
+    const [cols, setColumns] = useState(4);
+    const [playerCount, setPlayerCount] = useState(3);
 
     const [gamePasscode, setGamePasscode] = useState(null);
 
