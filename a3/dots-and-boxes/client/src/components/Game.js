@@ -1,6 +1,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import PROXY from '../Global'
 
 function Game(props) {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ function Game(props) {
 
     useEffect(() => {
         let json_response = null;
-        fetch('/game/' + gamePasscode)
+        fetch(PROXY+'/game/' + gamePasscode, {credentials: 'include'})
             .then(response => response.json())
             .then(data => { console.log("App:handleJoinGame: data is ", data); json_response = data; })
             .then(
@@ -120,7 +121,7 @@ function Game(props) {
 
     const handlePoll = () => {
         let json_response = null;
-        fetch('/pollGame/' + gamePasscode)
+        fetch(PROXY+'/pollGame/' + gamePasscode, {credentials: 'include'})
             .then(response => response.json())
             .then(data => { console.log("App:handlepoll: data is ", data); json_response = data; })
             // .then(data => json_response = data)
@@ -189,11 +190,12 @@ function Game(props) {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({
                 "points": [x1, y1, x2, y2],
             })
         };
-        fetch('/applyMove/' + gamePasscode, requestOptions)
+        fetch(PROXY+'/applyMove/' + gamePasscode, requestOptions)
             .then(response => response.json())
             .then(data => { console.log("Game:handleMouseClick: data is ", data); json_response = data; })
             .then(

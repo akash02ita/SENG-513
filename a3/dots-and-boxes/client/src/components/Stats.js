@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PROXY from '../Global'
 
 function Stats(props) {
     const navigate = useNavigate();
@@ -10,7 +11,7 @@ function Stats(props) {
 
     useEffect(() => {
         let json_response = null;
-        fetch('/game/' + gamePasscode)
+        fetch(PROXY + '/game/' + gamePasscode, { credentials: 'include' })
             .then(response => response.json())
             .then(data => { console.log("Stats:getData: data is ", data); json_response = data; })
             .then(
@@ -42,7 +43,7 @@ function Stats(props) {
         const playersScore = { ...lastStatus.playersScore };
         const maxScore = Math.max(...Object.values(playersScore));
         const winnerEntries = Object.entries(playersScore).filter(([key, value]) => value === maxScore);
-        
+
         const winner_s = winnerEntries.length === 1 ? "winner" : "winners";
         const is_are = winnerEntries.length === 1 ? "is" : "are";
         const divWinners = winnerEntries.map(([playerName, _playerScore]) => {
@@ -61,7 +62,7 @@ function Stats(props) {
             </div>
         </div>);
     }
-    
+
     const renderPlayersSCore = () => {
         if (!gameData) {
             return (<div></div>);
@@ -69,7 +70,7 @@ function Stats(props) {
         const historyGame = gameData["history"];
         const lastStatus = historyGame[historyGame.length - 1];
 
-        
+
         const playersScore = lastStatus.playersScore;
         const divPlayersScore = Object.entries(playersScore).map(([playerName, playersScore]) => {
             const userIndex = parseInt(playerName.split('player')[1]);
