@@ -66,15 +66,71 @@ function App() {
 
   const handleCreateGame = (username, rows, cols, playerCount) => {
     console.log(`App:handleCreateGame: received username: ${username}, rows: ${rows}, cols: ${cols}, playerCount: ${playerCount}`);
-    // TODO: do a  POST request to create game
+    // do a  POST request to create game
     // success: move forward
     // fail: do not go anywhere
+    let json_response = null;
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        "username": username,
+        "rows": rows,
+        "cols": cols,
+        "numPlayers": playerCount
+      })
+    };
+    fetch('/createGame', requestOptions)
+      .then(response => response.json())
+      .then(data => { console.log("App:handleCreateGame: data is ", data); json_response = data; })
+      .then(
+        () => {
+          if (!json_response) {
+            alert("No response received");
+            return;
+          }
+          const status = json_response["status"];
+          if (status !== 'success') {
+            alert(json_response["description"]);
+            return;
+          }
+
+          const gamePasscode = json_response["shared"]["gamePasscode"];
+          handleJoinGame(username, gamePasscode);
+        }
+      );
   }
   const handleJoinGame = (username, gamePasscode) => {
     console.log(`App:handleJoinGame: received  username: ${username}, gamePasscode: ${gamePasscode}`);
-    // TODO: do a POST request to game passcode link
+    // do a POST request to game passcode link
     // if successful then call parent function, otherwise prompt to enter again a valid existing game passcode
-    // navigate("game/" + gamePasscode); // if success of POST
+    let json_response = null;
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        "username": username
+      })
+    };
+    fetch('/game/' + gamePasscode, requestOptions)
+      .then(response => response.json())
+      .then(data => { console.log("App:handleJoinGame: data is ", data); json_response = data; })
+      .then(
+        () => {
+          if (!json_response) {
+            alert("No response received");
+            return;
+          }
+          const status = json_response["status"];
+          if (status !== 'success') {
+            alert(json_response["description"]);
+            return;
+          }
+
+          const gamePasscode = json_response["shared"]["gamePasscode"];
+          navigate("game/" + gamePasscode);
+        }
+      );
   }
 
 
