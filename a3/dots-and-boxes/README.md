@@ -3,7 +3,7 @@
 
 ## Live Demo Link
 
-To be deployed yet on `render.com`
+https://dots-and-boxes-hd2q.onrender.com
 
 ## Location installation and runnning
 
