@@ -19,7 +19,7 @@ function Game(props) {
 
     useEffect(() => {
         let json_response = null;
-        fetch(PROXY+'/game/' + gamePasscode, {credentials: 'include'})
+        fetch(PROXY+'/game/' + gamePasscode)
             .then(response => response.json())
             .then(data => { console.log("App:handleJoinGame: data is ", data); json_response = data; })
             .then(
@@ -121,7 +121,7 @@ function Game(props) {
 
     const handlePoll = () => {
         let json_response = null;
-        fetch(PROXY+'/pollGame/' + gamePasscode, {credentials: 'include'})
+        fetch(PROXY+'/pollGame/' + gamePasscode)
             .then(response => response.json())
             .then(data => { console.log("App:handlepoll: data is ", data); json_response = data; })
             // .then(data => json_response = data)
@@ -190,7 +190,6 @@ function Game(props) {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({
                 "points": [x1, y1, x2, y2],
             })

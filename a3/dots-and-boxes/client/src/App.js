@@ -73,7 +73,6 @@ function App() {
     let json_response = null;
     const requestOptions = {
       method: 'POST',
-      credentials: "include",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         "username": username,
@@ -109,7 +108,6 @@ function App() {
     let json_response = null;
     const requestOptions = {
       method: 'POST',
-      credentials: "include", // CORS cookie issues
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         "username": username
