@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import PROXY from '../Global'
 
 function Stats(props) {
     const navigate = useNavigate();
@@ -11,7 +10,7 @@ function Stats(props) {
 
     useEffect(() => {
         let json_response = null;
-        fetch(PROXY+'/game/' + gamePasscode)
+        fetch('/game/' + gamePasscode)
             .then(response => response.json())
             .then(data => { console.log("Stats:getData: data is ", data); json_response = data; })
             .then(
