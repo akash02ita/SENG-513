@@ -213,8 +213,7 @@ exports.joinGame_post = (req, res) => {
 
     // set cookies for user token of passcode
     const token = generateToken();
-    // setting sameSite to none for CORS fix
-    res.cookie(key, token, { sameSite: 'none', secure: true });
+    res.cookie(key, token);
 
     // update game room as well
     games[key]["shared"]["users"].push(req.body["username"]);

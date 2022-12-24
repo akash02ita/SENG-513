@@ -1,7 +1,6 @@
 // probably use index.css as the global css file: assignment requires exactly one css styles sheet to be used
 
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import PROXY from './Global'
 
 import Landing from './components/Landing'
 import Game from './components/Game'
@@ -73,7 +72,6 @@ function App() {
     let json_response = null;
     const requestOptions = {
       method: 'POST',
-      credentials: "include",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         "username": username,
@@ -82,7 +80,7 @@ function App() {
         "numPlayers": playerCount
       })
     };
-    fetch(PROXY+'/createGame', requestOptions)
+    fetch('/createGame', requestOptions)
       .then(response => response.json())
       .then(data => { console.log("App:handleCreateGame: data is ", data); json_response = data; })
       .then(
@@ -109,13 +107,12 @@ function App() {
     let json_response = null;
     const requestOptions = {
       method: 'POST',
-      credentials: "include", // CORS cookie issues
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         "username": username
       })
     };
-    fetch(PROXY+'/game/' + gamePasscode, requestOptions)
+    fetch('/game/' + gamePasscode, requestOptions)
       .then(response => response.json())
       .then(data => { console.log("App:handleJoinGame: data is ", data); json_response = data; })
       .then(
